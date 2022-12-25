@@ -9,7 +9,9 @@ class AccountRegModel(BaseModel):
     acc_kpp
     acc_bik
     acc_bank_name
-    acc_k_"""
+    acc_k_schet
+    acc_r_schet
+    acc_address"""
     acc_contact_name: str | None
     acc_org_name: str | None
     acc_email: str | None
@@ -22,3 +24,11 @@ class AccountRegModel(BaseModel):
     acc_k_schet: str | None = Field(default=None, description="К/счет (корреспондентский счет)")
     acc_r_schet: str | None = Field(default=None, description="Р/счет (расчетный счет)")
     acc_address: str | None = Field(default=None, description="address")
+
+
+class AccountRecModel(BaseModel):
+    """ MODEL FOR ACCOUNT RECOVERY"""
+    acc_email: str
+    acc_pass: str
+
+

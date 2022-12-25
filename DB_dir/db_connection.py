@@ -25,17 +25,13 @@ class DatabaseConnection:
         """GET CONFIGS FROM db_configs.txt"""
         x = os.getcwd()
         try:
-            # with open(x+'/db_configs.txt') as configs:
-            #     for line in configs:
-            #         key, value = line.strip().split('=')
-            #         self.__configs[key] = value
-            # print("CONFIGS CREATED")
+            #if ConfigParser.get_configs():
             self.__configs = dict(
-                host='localhost',
-                port=5432,
-                user='pcassa',
-                password=1234,
-                database='testing')
+                    host='localhost',
+                    port=5432,
+                    user='pcassa',
+                    password=1234,
+                    database='testing')
         except Exception as e:
             print(f"ERROR {e}")
 
@@ -68,7 +64,7 @@ class DatabaseConnection:
     @staticmethod
     def create_cursor():
         """Create a cursor and extract as dictionary"""
-        return DatabaseConnection.__run().cursor(cursor_factory=sql_dict.DictCursor)
+        return DatabaseConnection.__run().cursor(cursor_factory=sql_dict.RealDictCursor)
 
     @classmethod
     def commit(cls):

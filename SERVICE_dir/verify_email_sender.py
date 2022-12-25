@@ -3,14 +3,14 @@ import urllib.parse
 from email.mime.text import MIMEText
 
 
-def generate_url(*, id):
+def generate_url(*, id_: str):
     """ GENERATE URL FOR VERIFYING ACCOUNT"""
     url = 'http://192.168.0.104:8000/verify/?'
-    params = {'temp_acc_id': id, 'date': 'TFVEVBJHBhbghefv87y7t'}
+    params = {'temp_acc_id': id_, 'data': 'JbbfghGVEVGEJKIJCVBEJGHEBEKKEHBHNKVIRH'}
     return url + urllib.parse.urlencode(params)
 
 
-def send_message(*, receiver_email: str, message: str):
+def send_verify_link(*, receiver_email: str, message: str):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
         sender_email = 'testauthor96@mail.ru'
@@ -26,6 +26,6 @@ def send_message(*, receiver_email: str, message: str):
         print('SUCCESS EMAIL Sent')
         return True
     except Exception as e:
-        print('ERROR EMAIL Sent')
-        return e
+        print(e)
+        return False
 
