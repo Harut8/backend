@@ -12,14 +12,21 @@ class ServiceManipulator:
             GET id for generating unique url for verifying
             UPDATE temp db and add link to table"""
         if DBManipulator.post_acc_into_temp_db(item=temp_acc_model):
-            id_for_link_generate = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)[0]['t_id']
-            generated_link = es.generate_url(id=id_for_link_generate)
+            id_for_link_generate = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)['t_id']
+            generated_link = es.generate_url(id_=id_for_link_generate)
             es.send_message(receiver_email=temp_acc_model.acc_email, message=generated_link)
             DBManipulator.post_link_into_temp_company(link=generated_link, name=temp_acc_model.acc_org_name)
             return True
         else:
             raise Exception('SOMETHING ERROR')
         return False
+
+    @staticmethod
+    def verify_link(*, id: int):
+        if DBManipulator.verify_link(id=id):
+            return True
+        else:
+            return False
 
 
 

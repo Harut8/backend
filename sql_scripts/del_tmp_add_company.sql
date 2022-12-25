@@ -23,13 +23,14 @@ returns text
 language plpgsql
 AS $$
 DECLARE
-x temp_table_info;
+temp_info temp_table_info;
 rand_id int;
 find_id int;
 check_point bool:= false;
 diller_id int:=1;
 BEGIN 
 	--SELECT d_id INTO diller_id FROM diller WHERE d_name = 'EKey';
+	/* try to get diller_id for adding to the company table  */
 	if diller_id is null then
 		return 'ERROR';
 	end if;
@@ -45,12 +46,13 @@ BEGIN
 		   t_c_bik,
 		   t_c_bank_name,
 		   t_c_address
-	into x
+	into temp_info
 	FROM temp_company WHERE t_id = temp_id;
-	IF x.t_c_name IS NULL THEN
+	IF temp_info.t_c_name IS NULL THEN
 		RETURN 'ERROR';
 	END IF;
 	WHILE not check_point LOOP
+		/* generate random id for company user*/
 		SELECT floor(random()* (10000000-99999999 + 1) + 99999999) into rand_id;
 		SELECT c_id INTO find_id FROM company WHERE c_id = rand_id;
 	
@@ -69,12 +71,13 @@ BEGIN
 						c_bik,
 						c_bank_name,
 						c_address)
-			VALUES(rand_id, 1 ,x.*);
+			VALUES(rand_id, 1 ,temp_info.*);
+			delete from temp_company where t_id  = temp_id;
 			check_point := true;
 		end if;
 		
 	END LOOP;
 		
-return 'success';
+return 'SUCCESS';
 END;
 $$

@@ -22,9 +22,13 @@ async def acc_signin(acc_reg_model: AcRM.AccountRegModel):
     else:
         return {"status": "ADD ERROR"}
 
-@api.post(APIRoutes.acc_verify_route)
-async def acc_verify(temp_acc_id, data):
-    print(temp_acc_id)
+@api.get(APIRoutes.acc_verify_route)
+async def acc_verify(temp_acc_id: str, data:str):
+    #print(temp_acc_id)
+    if SMp.verify_link(id=int(temp_acc_id)):
+        return {"status": "OK"}
+    else:
+        return {"status": "ERROR"}
 def start_server():
     """Start server"""
-    run(api)
+    run(api, host='192.168.0.104')

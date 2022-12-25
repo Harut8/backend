@@ -68,7 +68,7 @@ class DatabaseConnection:
     @staticmethod
     def create_cursor():
         """Create a cursor and extract as dictionary"""
-        return DatabaseConnection.__run().cursor(cursor_factory=sql_dict.DictCursor)
+        return DatabaseConnection.__run().cursor(cursor_factory=sql_dict.RealDictCursor)
 
     @classmethod
     def commit(cls):

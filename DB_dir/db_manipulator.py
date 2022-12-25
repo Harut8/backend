@@ -55,7 +55,7 @@ class DatabaseManipulator:
                 SQL_query = f"""SELECT t_id FROM temp_company WHERE t_c_name = '{name}'"""
                 cursor.execute(SQL_query)
                 print('SUCCESSFULL GETTING NAME')
-                return [dict(i) for i in cursor.fetchall()]
+                return cursor.fetchall()[0]
         except Exception as e:
             print(e)
             return False
@@ -68,6 +68,19 @@ class DatabaseManipulator:
                 cursor.execute(SQL_query)
                 DBConnection.commit()
                 print('SUCCESS ADD LINK TO temp db')
+                return True
+        except Exception as e:
+            print(e)
+            return False
+
+    @staticmethod
+    def verify_link(*, id: int):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                SQL_query = f"""SELECT del_tmp_add_company({id})"""
+                cursor.execute(SQL_query)
+                DBConnection.commit()
+                print('SUCCESS TO VERIFY LINK')
                 return True
         except Exception as e:
             print(e)
