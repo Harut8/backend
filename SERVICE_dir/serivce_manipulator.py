@@ -1,5 +1,6 @@
 from DB_dir.db_manipulator import DatabaseManipulator as DBManipulator
 from MODELS_dir.acc_model import AccountRegModel
+from MODELS_dir.acc_model import AccountSignModel
 from SERVICE_dir import verify_email_sender as ves
 from SERVICE_dir import send_recovery_code as src
 
@@ -39,11 +40,18 @@ class ServiceManipulator:
             return False
 
     @staticmethod
-    def update_acc_pass(*, acc_email: str, acc_pass: str):
-        if DBManipulator.update_acc_pass(acc_email=acc_email, acc_pass=acc_pass):
+    def update_acc_pass(*, acc_email: str, acc_new_pass: str):
+        if DBManipulator.update_acc_pass(acc_email=acc_email, acc_pass=acc_new_pass):
             return True
         else:
             return False
+
+    @staticmethod
+    def signin_acc(*, acc_email: str, acc_pass: str):
+        tmp_ = DBManipulator.signin_acc(acc_email=acc_email, acc_pass=acc_pass)
+        if tmp_[0]:
+            return True, tmp_[1]
+        return tmp_
 
 
 
