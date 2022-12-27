@@ -13,7 +13,7 @@ async def start():
 
 
 @api.post(APIRoutes.acc_register_route)
-async def acc_signin(acc_reg_model: AcRM.AccountRegModel):
+async def acc_signup(acc_reg_model: AcRM.AccountRegModel):
     """AcRM is account registration model
     REGISTRATION API"""
     tmp = SMp.post_acc_into_temp_db(temp_acc_model=acc_reg_model)
@@ -55,12 +55,21 @@ async def acc_recovery(code_for_verify: str):
 @api.put(APIRoutes.acc_update_pass)
 async def acc_update_pass(acc_rec_model: AcRM.AccountRecModel):
     """ UPDATE PASS OF USER """
-    if SMp.update_acc_pass(acc_email=acc_rec_model.acc_email, acc_pass=acc_rec_model.acc_pass):
+    if SMp.update_acc_pass(acc_email=acc_rec_model.acc_email, acc_new_pass=acc_rec_model.acc_new_pass):
         return {"status": "OK"}
     else:
         return {"status": "UPDATE ERROR"}
 
 
+@api.post(APIRoutes.acc_login_route)
+async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
+    check_ = SMp.signin_acc(acc_email=acc_sign_model.acc_email, acc_pass=acc_sign_model.acc_pass)
+    if check_[0]:
+        return check_[1]
+    else:
+        return {"status": "SIGNIN ERROR"}
+
 def start_server():
     """Start server"""
-    run(api, host='192.168.0.104')
+    run(api, host='192.168.1.207')
+#'192.168.0.104'

@@ -29,6 +29,10 @@ class AccountRegModel(BaseModel):
 class AccountRecModel(BaseModel):
     """ MODEL FOR ACCOUNT RECOVERY"""
     acc_email: str
+    acc_new_pass: str
+
+
+class AccountSignModel(BaseModel):
+    """ MODEL FOR ACCOUNT SIGNIN """
+    acc_email: str
     acc_pass: str
-
-

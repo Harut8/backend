@@ -109,6 +109,7 @@ class DatabaseManipulator:
 
     @staticmethod
     def update_acc_pass(*, acc_email: str, acc_pass: str):
+        """ UPDATE PASSWORD OF ACCOUNT AN THIS EMAIL"""
         try:
             with DBConnection.create_cursor() as cursor:
                 SQL_query = f"""UPDATE company SET c_pass = %(pass)s WHERE c_email = %(email)s"""
@@ -122,4 +123,17 @@ class DatabaseManipulator:
             print(e)
             return False
 
-
+    @staticmethod
+    def signin_acc(*, acc_email: str, acc_pass: str):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                acc_pass = hashlib.sha256(acc_pass.encode()).hexdigest()
+                SQL_query = """SELECT * FROM company WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
+                cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
+                data = cursor.fetchone()
+                if data == None:
+                    return (False,)
+                return (True, data)
+        except Exception as e:
+            print(e)
+            return (False,)
