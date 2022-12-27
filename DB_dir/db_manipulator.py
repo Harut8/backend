@@ -101,12 +101,28 @@ class DatabaseManipulator:
                 cursor.execute(SQL_query)
                 DBConnection.commit()
                 print('SUCCESS TO VERIFY LINK')
+                data = cursor.fetchone()
+                if data!=None:
+                    return (True, data)
+                return (False,)
+        except Exception as e:
+            print(e)
+            return (False,)
+
+    @staticmethod
+    def send_unique_code_and_pass(*, acc_unique_id: int):
+        """ GET c_unique_code and password and send to user email"""
+        try:
+            with DBConnection.create_cursor() as cursor:
+                SQL_query = f"""
+                UPDATE company SET c_verify_status = true WHERE c_unique_id = %(acc_unique_id)s
+                """
+                cursor.execute(SQL_query, {'acc_unique_id': acc_unique_id})
+                DBConnection.commit()
                 return True
         except Exception as e:
             print(e)
             return False
-
-
     @staticmethod
     def update_acc_pass(*, acc_email: str, acc_pass: str):
         """ UPDATE PASSWORD OF ACCOUNT AN THIS EMAIL"""
@@ -128,12 +144,27 @@ class DatabaseManipulator:
         try:
             with DBConnection.create_cursor() as cursor:
                 acc_pass = hashlib.sha256(acc_pass.encode()).hexdigest()
-                SQL_query = """SELECT * FROM company WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
+                SQL_query = """SELECT c_name, c_contact_name FROM company WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
                 cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                 data = cursor.fetchone()
                 if data == None:
+                    SQL_query = """SELECT c_name, d_name FROM company c
+                     LEFT JOIN diller d ON c.c_diller_id = d.d_id
+                     WHERE c_email = %(acc_email)s AND %(acc_pass)s IN (SELECT d_pass FROM diller)"""
+                    cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
+                    data = cursor.fetchone()
+                    if data != None:
+                        return (True, data)
+                    elif data == None:
+                        SQL_query = """SELECT d_name, d_contact_name FROM diller WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
+                        cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
+                        data = cursor.fetchone()
+                        if data != None:
+                            return (True, data)
+
                     return (False,)
                 return (True, data)
         except Exception as e:
             print(e)
             return (False,)
+"""  UNIQUE CODE SEND     COMPANY_EMAIL_STATUS """

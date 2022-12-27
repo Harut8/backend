@@ -4,6 +4,7 @@ from uvicorn import run
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AcRM
 from SERVICE_dir.serivce_manipulator import ServiceManipulator as SMp
+import webbrowser
 api = Fapi()
 
 
@@ -26,8 +27,12 @@ async def acc_signup(acc_reg_model: AcRM.AccountRegModel):
 @api.get(APIRoutes.acc_verify_route)
 async def acc_verify(temp_acc_id: str, data: str):
     """VERIFY ACCOUNT SENDING EMAIL"""
-    if SMp.verify_link(temp_id=int(temp_acc_id)):
-        return {"status": "OK"}
+    temp_ = SMp.verify_link(temp_id=int(temp_acc_id))
+    if temp_[0]:
+        print(temp_)
+        if SMp.send_unique_code_and_pass(acc_unique_id=temp_[1], acc_email=temp_[2]):
+            webbrowser.open('pcassa.ru')
+            return {"status": 'OK'}
     else:
         return {"status": "ERROR"}
 
@@ -69,7 +74,8 @@ async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
     else:
         return {"status": "SIGNIN ERROR"}
 
+
 def start_server():
     """Start server"""
-    run(api, host='192.168.1.207')
+    run(api, host='192.168.0.104')
 #'192.168.0.104'

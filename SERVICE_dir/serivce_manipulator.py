@@ -3,6 +3,7 @@ from MODELS_dir.acc_model import AccountRegModel
 from MODELS_dir.acc_model import AccountSignModel
 from SERVICE_dir import verify_email_sender as ves
 from SERVICE_dir import send_recovery_code as src
+from SERVICE_dir import send_unique_id as sui
 
 
 class ServiceManipulator:
@@ -26,10 +27,13 @@ class ServiceManipulator:
     @staticmethod
     def verify_link(*, temp_id: int):
         """ verify email using temp id"""
-        if DBManipulator.verify_link(temp_id=temp_id):
-            return True
+        temp_ = DBManipulator.verify_link(temp_id=temp_id)
+        if temp_[0]:
+            data = temp_[1]['del_tmp_add_company'][1:-1].split(',')
+            print(data)
+            return (True, data[0], data[1])
         else:
-            return False
+            return (False,)
 
     @staticmethod
     def recovery_code(*, receiver_email: str):
@@ -52,6 +56,13 @@ class ServiceManipulator:
         if tmp_[0]:
             return True, tmp_[1]
         return tmp_
+
+    @staticmethod
+    def send_unique_code_and_pass(*, acc_unique_id: str, acc_email: str):
+        if sui.send_unique_id(receiver_email=acc_email, message=acc_email):
+            if DBManipulator.send_unique_code_and_pass(acc_unique_id=int(acc_unique_id)):
+                return True
+        return False
 
 
 
