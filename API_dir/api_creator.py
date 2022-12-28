@@ -3,7 +3,7 @@ from fastapi import HTTPException as HTEXP
 from uvicorn import run
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AcRM
-from SERVICE_dir.serivce_manipulator_account import ServiceManipulator as SMp
+from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMp
 import webbrowser
 api = Fapi()
 
