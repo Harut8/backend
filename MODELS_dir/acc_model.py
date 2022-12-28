@@ -1,5 +1,11 @@
 from pydantic import BaseModel
 from pydantic import Field
+"""
+HERE IS MODELS FOR WORKING WITH ACCOUNT
+---ACCOUNT REGISTRATION
+---ACCOUNT LOGIN
+---ACCOUNT RECOVERY
+"""
 
 
 class AccountRegModel(BaseModel):

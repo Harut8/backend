@@ -1,6 +1,7 @@
 import smtplib
 import random
 
+
 def send_recovery_code(*, receiver_email: str):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
@@ -14,7 +15,7 @@ def send_recovery_code(*, receiver_email: str):
         smtp_server.sendmail(sender_email, receiver_add, message)
         smtp_server.quit()
         print('SUCCESS EMAIL Sent')
-        return (True,message)
+        return True, message
     except Exception as e:
         print(e)
-        return (False,)
+        return False,

@@ -20,7 +20,7 @@ def send_verify_link(*, receiver_email: str, message: str):
         smtp_server.starttls() #setting up to TLS connection
         smtp_server.login(sender_email, password) #logging into out email id
         #print(message)
-        msg = MIMEText(u'<a href="{mes}">VERIFY EMAIL</a>'.format(mes=message), 'html')
+        msg = MIMEText(u'<a href="{mes}">CLICK TO VERIFY YOUR PCASSA ACCOUNT</a>'.format(mes=message), 'html')
         smtp_server.sendmail(sender_email, receiver_add, f"{msg}")
         smtp_server.quit()
         print('SUCCESS EMAIL Sent')
@@ -28,4 +28,3 @@ def send_verify_link(*, receiver_email: str, message: str):
     except Exception as e:
         print(e)
         return False
-

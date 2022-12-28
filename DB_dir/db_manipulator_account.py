@@ -3,8 +3,9 @@ from MODELS_dir.acc_model import AccountRegModel
 import hashlib
 
 
-class DatabaseManipulator:
+class DatabaseManipulatorACCOUNT:
     """ CLASS FOR MANIPULATING WITH DATABASE TABLES """
+
     @staticmethod
     def post_acc_into_temp_db(*, item: AccountRegModel):
         """ INSERT acc INFO INTO TEMP DATABASE"""
@@ -57,7 +58,7 @@ class DatabaseManipulator:
                     'acc_address': item.acc_address,
                 })
                 DBConnection.commit()
-                #DBConnection.close()
+                # DBConnection.close()
                 return True
         except Exception as e:
             print(e)
@@ -102,15 +103,15 @@ class DatabaseManipulator:
                 DBConnection.commit()
                 print('SUCCESS TO VERIFY LINK')
                 data = cursor.fetchone()
-                if data!=None:
-                    return (True, data)
-                return (False,)
+                if data is not None:
+                    return True, data
+                return False,
         except Exception as e:
             print(e)
-            return (False,)
+            return False,
 
     @staticmethod
-    def send_unique_code_and_pass(*, acc_unique_id: int):
+    def update_verify_status(*, acc_unique_id: int):
         """ GET c_unique_code and password and send to user email"""
         try:
             with DBConnection.create_cursor() as cursor:
@@ -123,6 +124,7 @@ class DatabaseManipulator:
         except Exception as e:
             print(e)
             return False
+
     @staticmethod
     def update_acc_pass(*, acc_email: str, acc_pass: str):
         """ UPDATE PASSWORD OF ACCOUNT AN THIS EMAIL"""
@@ -133,7 +135,21 @@ class DatabaseManipulator:
                 hash_pass = hash_str.hexdigest()
                 cursor.execute(SQL_query, {'email': acc_email, 'pass': hash_pass})
                 DBConnection.commit()
-                print('SUCCESSFULL UPDATING PASS')
+                print('SUCCESSFULLY UPDATING PASS')
+                return True
+        except Exception as e:
+            print(e)
+            return False
+
+    @staticmethod
+    def delete_data_from_temp_if_failed(*, acc_email: str):
+        """ DELETE ROW FROM temp_company IF EMAIL FAILED """
+        try:
+            with DBConnection.create_cursor() as cursor:
+                SQL_query = """ DELETE FROM temp_company WHERE t_c_email = %(acc_email)s """
+                cursor.execute(SQL_query, {'acc_email': acc_email})
+                DBConnection.commit()
+                print('SUCCESSFULLY DELETED FROM TEMP')
                 return True
         except Exception as e:
             print(e)
@@ -141,30 +157,35 @@ class DatabaseManipulator:
 
     @staticmethod
     def signin_acc(*, acc_email: str, acc_pass: str):
+        """ 3 WAYS TO LOGIN
+            company_email and company_password
+            company_email and diller_password
+            diller_email and diller_password"""
         try:
             with DBConnection.create_cursor() as cursor:
                 acc_pass = hashlib.sha256(acc_pass.encode()).hexdigest()
-                SQL_query = """SELECT c_name, c_contact_name FROM company WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
+                SQL_query = """SELECT c_name, c_contact_name FROM company
+                                WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
                 cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                 data = cursor.fetchone()
-                if data == None:
+                if data is None:
                     SQL_query = """SELECT c_name, d_name FROM company c
                      LEFT JOIN diller d ON c.c_diller_id = d.d_id
                      WHERE c_email = %(acc_email)s AND %(acc_pass)s IN (SELECT d_pass FROM diller)"""
                     cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                     data = cursor.fetchone()
-                    if data != None:
-                        return (True, data)
-                    elif data == None:
-                        SQL_query = """SELECT d_name, d_contact_name FROM diller WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
+                    if data is not None:
+                        return True, data
+                    elif data is None:
+                        SQL_query = """SELECT d_name, d_contact_name FROM diller
+                                       WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
                         cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                         data = cursor.fetchone()
-                        if data != None:
-                            return (True, data)
+                        if data is not None:
+                            return True, data
 
-                    return (False,)
-                return (True, data)
+                    return False,
+                return True, data
         except Exception as e:
             print(e)
-            return (False,)
-"""  UNIQUE CODE SEND     COMPANY_EMAIL_STATUS """
+            return False,
