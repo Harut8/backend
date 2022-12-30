@@ -4,6 +4,7 @@ from uvicorn import run
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AcRM
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMp
+
 import webbrowser
 api = Fapi()
 
@@ -11,6 +12,16 @@ api = Fapi()
 @api.get(APIRoutes.main)
 async def start():
     return {'SERVER_STATUS': "RUNNING"}
+
+
+""" --------------START ACCOUNT API-s---------------
+--- account signup 
+--- account signin
+--- account verify
+--- account recovery code send
+--- account recovery code check
+--- account new password setting
+"""
 
 
 @api.post(APIRoutes.acc_register_route)
@@ -76,7 +87,13 @@ async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
         return {"status": "SIGNIN ERROR"}
 
 
+"""-------------END OF ACCOUNT API-s-----------------"""
+
+
 def start_server():
     """Start server"""
-    run(api, host='192.168.0.104')
+    run(api, host='192.168.0.104', )
+
+
+
 #'192.168.0.104'

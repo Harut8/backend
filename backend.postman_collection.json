@@ -1,0 +1,218 @@
+{
+	"info": {
+		"_postman_id": "c73a6306-a096-4735-aaa1-ebb9c8d207f3",
+		"name": "backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23768014"
+	},
+	"item": [
+		{
+			"name": "main page",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.0.104:8000/",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"acc_contact_name\": \"string\",\n  \"acc_org_name\": \"string\",\n  \"acc_email\": \"string\",\n  \"acc_pass\": \"string\",\n  \"acc_phone\": \"string\",\n  \"acc_inn\": \"string\",\n  \"acc_kpp\": \"string\",\n  \"acc_bik\": \"string\",\n  \"acc_bank_name\": \"string\",\n  \"acc_k_schet\": \"string\",\n  \"acc_r_schet\": \"string\",\n  \"acc_address\": \"string\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.0.104:8000/signup/",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						"signup",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "singin",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"acc_email\": \"string\",\n  \"acc_pass\": \"string\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.0.104:8000/signin/",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						"signin",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "recovery email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.0.104:8000/recovery/?receiver_email=email",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						"recovery",
+						""
+					],
+					"query": [
+						{
+							"key": "receiver_email",
+							"value": "email"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "recovery code",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.0.104:8000/recovery/?code_for_verify=code",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						"recovery",
+						""
+					],
+					"query": [
+						{
+							"key": "code_for_verify",
+							"value": "code"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update password",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"acc_email\": \"string\",\n  \"acc_new_pass\": \"string\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.0.104:8000/updatepass/",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						"updatepass",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "signin",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"acc_email\": \"string\",\n  \"acc_pass\": \"string\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.0.104:8000/signin/",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"0",
+						"104"
+					],
+					"port": "8000",
+					"path": [
+						"signin",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
