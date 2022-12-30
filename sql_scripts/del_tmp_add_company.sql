@@ -53,15 +53,17 @@ BEGIN
 		   t_c_address
 	into temp_info
 	FROM temp_company WHERE t_id = temp_id;
+	--FAILED GETTING INFO/ WRONG temp_id
 	IF temp_info.t_c_name IS NULL THEN
 	select null,null into res_data;
 		RETURN res_data;
 	END IF;
+	--END 
 	WHILE not check_point LOOP
 		/* generate random id for company user*/
 		SELECT floor(random()* (10000000-99999999 + 1) + 99999999) into rand_id;
-		SELECT c_id INTO find_id FROM company WHERE c_id = rand_id;
-	
+		SELECT c_id INTO find_id FROM company WHERE c_id = rand_id;--TRY GENERATE AND CHECK ARE THERE similar ID
+		
 		IF find_id IS NULL THEN
 			INSERT INTO company(c_unique_id,
 						c_diller_id,

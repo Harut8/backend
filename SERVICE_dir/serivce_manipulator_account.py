@@ -32,7 +32,7 @@ class ServiceManipulatorACCOUNT:
 
     @staticmethod
     def verify_link(*, temp_id: int):
-        """ verify email using temp id"""
+        """ verify email using temp id """
         temp_ = DBManipulator.verify_link(temp_id=temp_id)
         if temp_[0]:
             data = temp_[1]['del_tmp_add_company'][1:-1].split(',')
