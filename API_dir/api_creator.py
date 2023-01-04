@@ -4,9 +4,20 @@ from uvicorn import run
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AcRM
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMp
+from SERVICE_dir.service_manipulator_tarifes import ServiceManipulatorTARIFES as SMt
+from fastapi.middleware.cors import CORSMiddleware
 
-import webbrowser
 api = Fapi()
+
+origins = ["*"]
+
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @api.get(APIRoutes.main)
@@ -82,7 +93,7 @@ async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
     """ SIGNIN CHECKING RETURN VALUES """
     check_ = SMp.signin_acc(acc_email=acc_sign_model.acc_email, acc_pass=acc_sign_model.acc_pass)
     if check_[0]:
-        return {"status": "Success login"}
+        return check_[1]
     else:
         return {"status": "SIGNIN ERROR"}
 
@@ -90,10 +101,21 @@ async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
 """-------------END OF ACCOUNT API-s-----------------"""
 
 
+"""-------------START OF TARIFES API-s-----------------"""
+
+
+@api.get(APIRoutes.get_tarifes_for_view_route)
+def get_tarifes_for_view_route():
+    temp_ = SMt.get_tarifes_for_view()
+    if temp_[0]:
+        return temp_[1]
+    else:
+        return {"status": "ERROR GETTING TARIFES"}
+
 def start_server():
     """Start server"""
-    run(api, host='192.168.0.104', )
+    run(api,)
 
 
-
+#192.168.3.250
 #'192.168.0.104'

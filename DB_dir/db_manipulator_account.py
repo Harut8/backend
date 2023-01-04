@@ -4,7 +4,7 @@ import hashlib
 
 
 class DatabaseManipulatorACCOUNT:
-    """ CLASS FOR MANIPULATING WITH DATABASE TABLES """
+    """ CLASS FOR MANIPULATING WITH DATABASE ACCOUNT TABLES """
 
     @staticmethod
     def post_acc_into_temp_db(*, item: AccountRegModel):
@@ -164,7 +164,7 @@ class DatabaseManipulatorACCOUNT:
         try:
             with DBConnection.create_cursor() as cursor:
                 acc_pass = hashlib.sha256(acc_pass.encode()).hexdigest()
-                SQL_query = """SELECT c_name, c_contact_name FROM company
+                SQL_query = """SELECT c_name, c_contact_name, c_phone, c_email FROM company
                                 WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
                 cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                 data = cursor.fetchone()
@@ -177,7 +177,7 @@ class DatabaseManipulatorACCOUNT:
                     if data is not None:
                         return True, data
                     elif data is None:
-                        SQL_query = """SELECT d_name, d_contact_name FROM diller
+                        SQL_query = """SELECT d_name, d_contact_name, d_phone, d_email FROM diller
                                        WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
                         cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                         data = cursor.fetchone()

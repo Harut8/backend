@@ -7,7 +7,7 @@ from SERVICE_dir import send_unique_id as sui
 
 
 class ServiceManipulatorACCOUNT:
-    """BUSINESS LOGIC AFTER FETCHING DATA FROM DB"""
+    """BUSINESS LOGIC FOR ACCOUNT"""
     recovery_code_var = None
     pass_for_email_send = None
 
