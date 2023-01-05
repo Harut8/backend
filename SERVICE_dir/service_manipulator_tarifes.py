@@ -1,5 +1,8 @@
 from DB_dir.db_manipulator_tarifes import DatabaseManipulatorTARIFES
-from MODELS_dir.tarif_model import TarifModelForView, InnerModelForTarif
+from MODELS_dir.tarif_model import (TarifModelForView,
+                                    InnerModelForTarif,
+                                    TarifToClient,
+                                    PersonalTarifForClient)
 
 
 class ServiceManipulatorTARIFES:
@@ -28,3 +31,12 @@ class ServiceManipulatorTARIFES:
             return True, data_for_view
         else:
             return False,
+
+    @staticmethod
+    def post_tarif_to_company(*, tarif: TarifToClient):
+        temp_ = DatabaseManipulatorTARIFES.post_tarife_to_client(
+            company_id=tarif.company_id,
+            tarif_id_or_info=tarif.tarif_id_or_info)
+        if temp_:
+            return True
+        return None

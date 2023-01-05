@@ -73,9 +73,10 @@ class ServiceManipulatorACCOUNT:
         """ IF unique_code sent then update table verify_status"""
         if ServiceManipulatorACCOUNT.pass_for_email_send is None:
             return False
-        if sui.send_unique_id(receiver_email=acc_email, message=f"Your unique code --- {acc_unique_id} ,"
-                                                                f" Your email --- {acc_email},"
-                                                                f" Your password --- {ServiceManipulatorACCOUNT.pass_for_email_send}"):
+        if sui.send_unique_id(receiver_email=acc_email,
+                              message=f"Your unique code --- {acc_unique_id} ,"
+                                      f" Your email --- {acc_email},"
+                                      f" Your password --- {ServiceManipulatorACCOUNT.pass_for_email_send}"):
             ServiceManipulatorACCOUNT.pass_for_email_send = None
             if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
                 return True

@@ -3,6 +3,7 @@ from fastapi import HTTPException as HTEXP
 from uvicorn import run
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AcRM
+from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient)
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMp
 from SERVICE_dir.service_manipulator_tarifes import ServiceManipulatorTARIFES as SMt
 from fastapi.middleware.cors import CORSMiddleware
@@ -95,7 +96,8 @@ async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
     if check_[0]:
         return check_[1]
     else:
-        return {"status": "SIGNIN ERROR"}
+        raise HTEXP(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
+        #return {"status": "SIGNIN ERROR"}
 
 
 """-------------END OF ACCOUNT API-s-----------------"""
@@ -114,11 +116,22 @@ def get_tarifes_for_view_route():
         return {"status": "ERROR GETTING TARIFES"}
 
 
+@api.post(APIRoutes.post_tarife_to_client)
+def post_tarife_to_client(tarif_for_client: TarifToClient):
+    """ POST TARIFE FOR CLIENT """
+    if SMt.post_tarif_to_company(tarif=tarif_for_client):
+        return {"status": "TARIF ADDED TO CLIENT"}
+    raise HTEXP(status_code=404, detail="ERROR", headers={'status': 'TARIF ADD ERROR'})
+
+
 """-------------END OF TARIFES API-s-----------------"""
+
+
 def start_server():
     """Start server"""
-    run(api,)
+    run(api, host='192.168.0.104')
 
 
 #192.168.3.250
 #'192.168.0.104'
+#192.168.3.203

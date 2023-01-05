@@ -11,6 +11,7 @@ class InnerModelForTarif(BaseModel):
     sklad_counts: int = None
     tarifes_others: list[str] = None
 
+
 class TarifModelForView(BaseModel):
     """MODEL FOR TARIFES VIEW"""
 
@@ -24,3 +25,17 @@ class TarifModelForView(BaseModel):
         if month_prices <= 0:
             return "FREE"
         return month_prices
+
+
+class PersonalTarifForClient(BaseModel):
+    """MODEL FOR PERSONAL TARIF USED BY CLIENT"""
+    cass_stantion: int | None = None
+    mobile_cass: int | None = None
+    mobile_manager: int | None = None
+    web_manager: int | None = None
+
+
+class TarifToClient(BaseModel):
+    """MODEL FOR ADDING TO CLIENT"""
+    company_id: int | None = None
+    tarif_id_or_info: int | PersonalTarifForClient | None = None
