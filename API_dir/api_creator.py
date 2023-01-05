@@ -106,12 +106,15 @@ async def signin_acc(acc_sign_model: AcRM.AccountSignModel):
 
 @api.get(APIRoutes.get_tarifes_for_view_route)
 def get_tarifes_for_view_route():
+    """ GET ALL POSSIBLE TARIFES FOR VIEW """
     temp_ = SMt.get_tarifes_for_view()
     if temp_[0]:
         return temp_[1]
     else:
         return {"status": "ERROR GETTING TARIFES"}
 
+
+"""-------------END OF TARIFES API-s-----------------"""
 def start_server():
     """Start server"""
     run(api,)
