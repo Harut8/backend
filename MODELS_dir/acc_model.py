@@ -40,5 +40,5 @@ class AccountRecModel(BaseModel):
 
 class AccountSignModel(BaseModel):
     """ MODEL FOR ACCOUNT SIGNIN """
-    acc_email: str
-    acc_pass: str
+    username: str
+    password: str

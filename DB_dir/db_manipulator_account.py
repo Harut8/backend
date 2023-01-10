@@ -164,7 +164,7 @@ class DatabaseManipulatorACCOUNT:
         try:
             with DBConnection.create_cursor() as cursor:
                 acc_pass = hashlib.sha256(acc_pass.encode()).hexdigest()
-                SQL_query = """SELECT c_name, c_contact_name, c_phone, c_email FROM company
+                SQL_query = """SELECT c_id, c_name, c_contact_name, c_phone, c_email FROM company
                                 WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
                 cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                 data = cursor.fetchone()
@@ -175,17 +175,77 @@ class DatabaseManipulatorACCOUNT:
                     cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                     data = cursor.fetchone()
                     if data is not None:
-                        return True, data
+                        return data
                     elif data is None:
                         SQL_query = """SELECT d_name, d_contact_name, d_phone, d_email FROM diller
                                        WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
                         cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                         data = cursor.fetchone()
                         if data is not None:
-                            return True, data
+                            return data
 
-                    return False,
-                return True, data
+                    return
+                return data
         except Exception as e:
             print(e)
-            return False,
+            return
+
+    @staticmethod
+    def signin_acc_info(*, acc_token: str):
+        """ 3 WAYS TO GET INFO BY TOKEN
+            company_email and company_password
+            company_email and diller_password
+            diller_email and diller_password"""
+        try:
+            with DBConnection.create_cursor() as cursor:
+                SQL_query = """SELECT c_id, c_name, c_contact_name, c_phone, c_email FROM company
+                                    WHERE c_token = %(acc_token)s"""
+                cursor.execute(SQL_query, {'acc_token': acc_token})
+                data = cursor.fetchone()
+                if data is None:
+                    SQL_query = """SELECT c_name, d_name FROM company c
+                         LEFT JOIN diller d ON c.c_diller_id = d.d_id
+                         WHERE c_token = %(acc_token)s """
+                    cursor.execute(SQL_query, {'acc_token': acc_token})
+                    data = cursor.fetchone()
+                    if data is not None:
+                        return data
+                    elif data is None:
+                        #change to token
+                        SQL_query = """SELECT d_name, d_contact_name, d_phone, d_email FROM diller
+                                           WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
+                        cursor.execute(SQL_query, {'acc_email': 'ddd', 'acc_pass': 'wjw'})
+                        data = cursor.fetchone()
+                        if data is not None:
+                            return data
+
+                    return
+                return data
+        except Exception as e:
+            print(e)
+            return
+
+    @staticmethod
+    def add_access_token_to_account(*, access_token: str, account_id: str):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute(
+                    """ UPDATE company SET c_token = %(access_token)s WHERE c_id = %(account_id)s""",
+                    {'access_token': access_token,
+                     'account_id': account_id
+                     })
+                DBConnection.commit()
+                return True
+        except Exception as e:
+            print(e)
+            return None
+
+    @staticmethod
+    def get_acc_info():
+        try:
+            with DBConnection.create_cursor() as cursor:
+                pass
+        except Exception as e:
+            print(e)
+            return None
+

@@ -4,12 +4,17 @@ from MODELS_dir.acc_model import AccountSignModel
 from SERVICE_dir import verify_email_sender as ves
 from SERVICE_dir import send_recovery_code as src
 from SERVICE_dir import send_unique_id as sui
+from SERVICE_dir import jwt_logic
 
 
 class ServiceManipulatorACCOUNT:
     """BUSINESS LOGIC FOR ACCOUNT"""
     recovery_code_var = None
     pass_for_email_send = None
+    ACCESS_TOKEN_FOR_CHECK = None
+    REFRESH_TOKEN_FOR_CHECK = None
+    TOKEN_THREAD1 = None
+    TOKEN_THREAD2 = None
 
     @staticmethod
     def post_acc_into_temp_db(temp_acc_model: AccountRegModel):
@@ -61,13 +66,32 @@ class ServiceManipulatorACCOUNT:
             return False
 
     @staticmethod
-    def signin_acc(*, acc_email: str, acc_pass: str):
-        """ Signin checking and return data from db """
+    def signin_acc(acc_email: str, acc_pass: str,):
+        """ SEND DATA FOR VALIDATING IN DATABASE
+            START THREADS FOR CHANGING TOKEN EVERY 30 MINUTE
+        """
         tmp_ = DBManipulator.signin_acc(acc_email=acc_email, acc_pass=acc_pass)
-        if tmp_[0]:
-            return True, tmp_[1]
-        return tmp_
+        if tmp_ is not None:
+            from threading import Timer, Event
+            ServiceManipulatorACCOUNT.TOKEN_THREAD1 = Timer(
+                100, ServiceManipulatorACCOUNT.signin_acc,
+                [acc_email, acc_pass]
+            )
+            ServiceManipulatorACCOUNT.TOKEN_THREAD2 = Timer(
+                100, ServiceManipulatorACCOUNT.auto_update_token_for_account,
+                args=[tmp_]
+            )
+            ServiceManipulatorACCOUNT.TOKEN_THREAD1.start()
+            ServiceManipulatorACCOUNT.TOKEN_THREAD2.start()
+            return tmp_
+        return
 
+    @staticmethod
+    def signin_acc_info(*, acc_token: str):
+        tmp_ = DBManipulator.signin_acc_info(acc_token=acc_token)
+        if tmp_ is not None:
+            return tmp_
+        return
     @staticmethod
     def send_unique_code_and_pass(*, acc_unique_id: str, acc_email: str):
         """ IF unique_code sent then update table verify_status"""
@@ -83,6 +107,32 @@ class ServiceManipulatorACCOUNT:
         ServiceManipulatorACCOUNT.pass_for_email_send = None
         return False
 
+    @staticmethod
+    def add_access_token_to_account(*, access_token: str, account_id: str):
+        """UPDATE ACCOUNT TOKEN"""
+        if DBManipulator.add_access_token_to_account(access_token=access_token, account_id=str(account_id)):
+            return True
+        return False
+
+    @staticmethod
+    def check_refresh_token(*, client_refresh_token: str,):
+        """CHECK SENDED TOKEN"""
+        print(ServiceManipulatorACCOUNT.REFRESH_TOKEN_FOR_CHECK)
+        if client_refresh_token == ServiceManipulatorACCOUNT.REFRESH_TOKEN_FOR_CHECK:
+            return True
+        return False
+
+    @staticmethod
+    def auto_update_token_for_account(account_object=None):
+        """AUTOMATICLY UPDATE TOKENS FOR ACCOUNT"""
+        if account_object is not None:
+            jwt_logic.change_secret_keys()
+            __ACCESS_TOKEN = jwt_logic.create_access_token(account_object)
+            if ServiceManipulatorACCOUNT.add_access_token_to_account(
+                access_token=__ACCESS_TOKEN,
+                account_id=account_object['c_id']):
+                return True
+        return
 
 
 
