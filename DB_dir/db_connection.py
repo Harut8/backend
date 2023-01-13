@@ -1,6 +1,6 @@
 import psycopg2 as sql
 import psycopg2.extras as sql_dict
-import os
+import configparser
 
 
 class DatabaseConnection:
@@ -23,15 +23,21 @@ class DatabaseConnection:
 
     def __get_database_configs(self):
         """GET CONFIGS FROM db_configs.txt"""
-        x = os.getcwd()
+
         try:
-            #if ConfigParser.get_configs():
+            conf = configparser.ConfigParser()
+            conf.read('DB_dir/DB_CONFIG.ini')
+            db_host = conf.get('DATABASE', 'host')
+            port = conf.getint('DATABASE', 'port')
+            user = conf.get('DATABASE', 'user')
+            password = conf.get('DATABASE', 'password')
+            database = conf.get('DATABASE', 'database')
             self.__configs = dict(
-                    host='localhost',
-                    port=5432,
-                    user='pcassa',
-                    password=1234,
-                    database='testing')
+                    host=db_host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    database=database)
         except Exception as e:
             print(f"ERROR {e}")
 
@@ -54,11 +60,10 @@ class DatabaseConnection:
     @classmethod
     def close(cls):
         """CLOSE CONNECTION IF EXISTS"""
-        if not cls.uniqueInstance.__connection:
+        try:
             cls.uniqueInstance.__connection.close()
             print("CONNECTION CLOSED")
-        else:
-            print("THERE ARE NO CONNECTION")
+        except Exception:
             return
 
     @staticmethod

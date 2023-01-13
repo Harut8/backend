@@ -7,6 +7,7 @@ from SERVICE_dir.jwt_logic import JWTParamas, create_access_token, create_refres
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AccountModel
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
+from DB_dir.db_connection import DatabaseConnection
 
 account_app = APIRouter(tags=["ACCOUNT FUNCTIONALITY"])
 
@@ -83,6 +84,8 @@ def end_api_background_tasks():
     if SMa.TOKEN_THREAD1 is not None and SMa.TOKEN_THREAD2 is not None:
         SMa.TOKEN_THREAD1.cancel()
         SMa.TOKEN_THREAD2.cancel()
+    DatabaseConnection.close()
+
 
 
 """ --------------START ACCOUNT API-s---------------
@@ -102,8 +105,7 @@ async def acc_signup(acc_reg_model: AccountModel.AccountRegModel):
     tmp = SMa.post_acc_into_temp_db(temp_acc_model=acc_reg_model)
     if tmp:
         return {"status": "REGISTERED"}
-    else:
-        return {"status": "ERROR"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTR ERROR'})
 
 
 @account_app.get(APIRoutes.acc_verify_route)
@@ -114,8 +116,7 @@ async def acc_verify(temp_acc_id: str, data: str):
         print(temp_)
         if SMa.send_unique_code_and_pass(acc_unique_id=temp_[1], acc_email=temp_[2]):
             return {"status": 'VERIFYING SUCCESS'}
-    else:
-        return {"status": "ERROR"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'VERIFY ERROR'})
 
 
 @account_app.get(APIRoutes.acc_recovery_route)
@@ -135,8 +136,7 @@ async def acc_recovery(code_for_verify: str):
     if code_for_verify == SMa.recovery_code_var:
         SMa.recovery_code_var = None
         return {"status": "VERIFY CODE TRUE"}
-    else:
-        return {"status": "CODE ERROR"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'CODE ERROR'})
 
 
 @account_app.put(APIRoutes.acc_update_pass)
@@ -146,8 +146,7 @@ async def acc_update_pass(acc_rec_model: AccountModel.AccountRecModel):
             acc_email=acc_rec_model.acc_email,
             acc_new_pass=acc_rec_model.acc_new_pass):
         return {"status": "UPDATE PASSWORD IS SUCCESSFUL"}
-    else:
-        return {"status": "UPDATE ERROR"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'UPDATE ERROR'})
 
 
 #AcRM.AccountSignModel
@@ -170,10 +169,7 @@ async def signin_acc(acc_sign_model: OAuth2PasswordRequestForm = Depends()):
                 "refresh_token": REFRESH_TOKEN
             }
         raise HTTPException(status_code=401, detail="ERROR", headers={'status': 'TOKEN ADD ERROR'})
-        #return check_[1]
-    else:
-        raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
-        #return {"status": "SIGNIN ERROR"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
 
 
 @account_app.post(APIRoutes.acc_refresh_token)
@@ -198,8 +194,7 @@ async def signin_acc_info(access_token: OAuth2PasswordBearer = Depends(get_curre
     check_ = SMa.signin_acc_info(acc_token=access_token)
     if check_ is not None:
         return check_
-    else:
-        raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
 """-------------END OF ACCOUNT API-s-----------------"""
 
 

@@ -74,11 +74,11 @@ class ServiceManipulatorACCOUNT:
         if tmp_ is not None:
             from threading import Timer, Event
             ServiceManipulatorACCOUNT.TOKEN_THREAD1 = Timer(
-                100, ServiceManipulatorACCOUNT.signin_acc,
+                30, ServiceManipulatorACCOUNT.signin_acc,
                 [acc_email, acc_pass]
             )
             ServiceManipulatorACCOUNT.TOKEN_THREAD2 = Timer(
-                100, ServiceManipulatorACCOUNT.auto_update_token_for_account,
+                30, ServiceManipulatorACCOUNT.auto_update_token_for_account,
                 args=[tmp_]
             )
             ServiceManipulatorACCOUNT.TOKEN_THREAD1.start()

@@ -10,5 +10,5 @@ class APIRoutes:
     acc_refresh_token = '/refreshtoken/'
 
     get_tarifes_for_view_route = '/gettarifesforview/'
-    post_tarife_to_client = '/posttarifetoclient/'
+    post_tarife_to_client = '/buytariftoclient/'
 

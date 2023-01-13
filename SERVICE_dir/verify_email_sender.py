@@ -3,9 +3,11 @@ import urllib.parse
 from email.mime.text import MIMEText
 
 
+
 def generate_url(*, id_: str):
     """ GENERATE URL FOR VERIFYING ACCOUNT"""
-    url = 'http://192.168.3.250:8000/verify/?'
+    from API_dir.api_creator import host
+    url = 'http://'+host+':8000/verify/?'
     params = {'temp_acc_id': id_, 'data': 'JbbfghGVEVGEJKIJCVBEJGHEBEKKEHBHNKVIRH'}
     return url + urllib.parse.urlencode(params)
 

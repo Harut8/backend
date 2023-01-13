@@ -3,6 +3,12 @@ from .account_app import account_app
 from .tarif_app import tarif_app
 from uvicorn import run
 from fastapi.middleware.cors import CORSMiddleware
+from configparser import ConfigParser
+
+conf = ConfigParser()
+conf.read('API_dir/API_CONFIG.ini')
+host = conf.get('API', 'host')
+
 
 main_app = FastAPI()
 main_app.include_router(account_app)
@@ -26,7 +32,7 @@ def main_route():
 
 def start_server():
     """Start server"""
-    run(main_app)
+    run(main_app, host=host)
 
 
 #192.168.3.250
