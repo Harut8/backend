@@ -42,7 +42,6 @@ def create_refresh_token(subject_id: Any, expires_delta: int = None) -> str:
 def change_secret_keys():
     from secrets import token_hex
     JWTParamas.SECRET_KEY, JWTParamas.REFRESH_SECRET_KEY = token_hex(32), token_hex(32)
-    ServiceManipulatorACCOUNT.STATE = True
 
 
 class TokenPayload(BaseModel):

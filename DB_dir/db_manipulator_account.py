@@ -164,7 +164,7 @@ class DatabaseManipulatorACCOUNT:
         try:
             with DBConnection.create_cursor() as cursor:
                 acc_pass = hashlib.sha256(acc_pass.encode()).hexdigest()
-                SQL_query = """SELECT c_id, c_name, c_contact_name, c_phone, c_email FROM company
+                SQL_query = """SELECT c_id, c_name FROM company
                                 WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
                 cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                 data = cursor.fetchone()
@@ -177,7 +177,7 @@ class DatabaseManipulatorACCOUNT:
                     if data is not None:
                         return data
                     elif data is None:
-                        SQL_query = """SELECT d_name, d_contact_name, d_phone, d_email FROM diller
+                        SQL_query = """SELECT d_id, d_name FROM diller
                                        WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
                         cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                         data = cursor.fetchone()
