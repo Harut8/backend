@@ -1,0 +1,6 @@
+fastapi
+pydantic
+uvicorn
+email_validator
+psycopg2
+python-multipart

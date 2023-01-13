@@ -1,3 +1,5 @@
+import jose.jwt
+
 from DB_dir.db_manipulator_account import DatabaseManipulatorACCOUNT as DBManipulator
 from MODELS_dir.acc_model import AccountRegModel
 from MODELS_dir.acc_model import AccountSignModel
@@ -23,8 +25,9 @@ class ServiceManipulatorACCOUNT:
             UPDATE temp db and add link to table"""
         ServiceManipulatorACCOUNT.pass_for_email_send = temp_acc_model.acc_pass
         if DBManipulator.post_acc_into_temp_db(item=temp_acc_model):
-            id_for_link_generate = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)['t_id']
-            generated_link = ves.generate_url(id_=id_for_link_generate)
+            id_for_link = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)['t_id']
+            id_for_link_generated_JWTencoded = jwt_logic.create_token_for_email_verify(str(id_for_link))
+            generated_link = ves.generate_url(id_=id_for_link_generated_JWTencoded)
             if ves.send_verify_link(receiver_email=temp_acc_model.acc_email, message=generated_link):
                 DBManipulator.post_link_into_temp_company(link=generated_link, name=temp_acc_model.acc_org_name)
                 return True
@@ -36,15 +39,17 @@ class ServiceManipulatorACCOUNT:
             return False
 
     @staticmethod
-    def verify_link(*, temp_id: int):
+    def verify_link(*, verify_token: str):
         """ verify email using temp id """
-        temp_ = DBManipulator.verify_link(temp_id=temp_id)
-        if temp_[0]:
-            data = temp_[1]['del_tmp_add_company'][1:-1].split(',')
-            print(data)
-            return True, data[0], data[1]
+        temp_id = jose.jwt.decode(verify_token,
+                                  jwt_logic.JWTParamas.VERIFY_SECRET_KEY,
+                                  jwt_logic.JWTParamas.ALGORITHM)['sub']
+        temp_ = DBManipulator.verify_link(temp_id=int(temp_id))
+        if temp_ is not None:
+            data = temp_['del_tmp_add_company'][1:-1].split(',')
+            return data
         else:
-            return False,
+            return None
 
     @staticmethod
     def recovery_code(*, receiver_email: str):
@@ -103,6 +108,7 @@ class ServiceManipulatorACCOUNT:
                                       f" Your password --- {ServiceManipulatorACCOUNT.pass_for_email_send}"):
             ServiceManipulatorACCOUNT.pass_for_email_send = None
             if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
+                ServiceManipulatorACCOUNT.pass_for_email_send = None
                 return True
         ServiceManipulatorACCOUNT.pass_for_email_send = None
         return False

@@ -8,7 +8,7 @@ def generate_url(*, id_: str):
     """ GENERATE URL FOR VERIFYING ACCOUNT"""
     from API_dir.api_creator import host
     url = 'http://'+host+':8000/verify/?'
-    params = {'temp_acc_id': id_, 'data': 'JbbfghGVEVGEJKIJCVBEJGHEBEKKEHBHNKVIRH'}
+    params = {'token_verify': id_, 'data': 'JbbfghGVEVGEJKIJCVBEJGHEBEKKEHBHNKVIRH'}
     return url + urllib.parse.urlencode(params)
 
 

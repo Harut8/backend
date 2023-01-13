@@ -8,6 +8,7 @@ from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT
 class JWTParamas:
     SECRET_KEY = '6c8c0e67f3d1c42637603597d47ca3d8f399deec3d224356ad4cc869bd141d12'
     REFRESH_SECRET_KEY = '22e639813fd17fcc812a513a6f34218f0fe7c282d8099a92422f919dc2c97a7b'
+    VERIFY_SECRET_KEY = '5df8bb072055803fe85769b4384cb184aefe216683b1c16717b02cfa6905a5fe'
     ALGORITHM = 'HS256'
     ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 60 minutes
     REFRESH_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
@@ -24,6 +25,13 @@ def create_access_token(subject_id: Any, expires_delta: int = None) -> str:
     ServiceManipulatorACCOUNT.ACCESS_TOKEN_FOR_CHECK = encoded_jwt
     ServiceManipulatorACCOUNT.ACCOUNT_ID_FOR_TOKEN = id_
     return encoded_jwt
+
+
+def create_token_for_email_verify(subject_id: str):
+    to_encode = {"sub": subject_id}
+    encoded_jwt = jwt.encode(to_encode, JWTParamas.VERIFY_SECRET_KEY, JWTParamas.ALGORITHM)
+    return encoded_jwt
+
 
 
 def create_refresh_token(subject_id: Any, expires_delta: int = None) -> str:

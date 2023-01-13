@@ -20,18 +20,18 @@ class AccountRegModel(BaseModel):
     acc_k_schet
     acc_r_schet
     acc_address"""
-    acc_contact_name: str | None
-    acc_org_name: str | None
-    acc_email: str | None
-    acc_pass: str | None
-    acc_phone: str | None
+    acc_contact_name: str
+    acc_org_name: str
+    acc_email: str
+    acc_pass: str
+    acc_phone: str
     acc_address: str | None
-    acc_inn: str | None = Field(default=None, description="Идентификационный номер налогоплательщика")
-    acc_kpp: str | None = Field(default=None, description="код причины постановки")
-    acc_bik: str | None = Field(default=None, description="Бик (банковский идентификационный код)")
-    acc_bank_name: str | None = Field(default=None, description="")
-    acc_k_schet: str | None = Field(default=None, description="К/счет (корреспондентский счет)")
-    acc_r_schet: str | None = Field(default=None, description="Р/счет (расчетный счет)")
+    acc_inn: str | None = Field(default=None, description="Идентификационный номер налогоплательщика", regex=r'\d{1,15}')
+    acc_kpp: str | None = Field(default=None, description="код причины постановки", regex=r'\d{1,15}')
+    acc_bik: str | None = Field(default=None, description="Бик (банковский идентификационный код)", regex=r'\d{1,15}')
+    acc_bank_name: str | None = Field(default=None, description="", regex=r'\w{1,40}')
+    acc_k_schet: str | None = Field(default=None, description="К/счет (корреспондентский счет)", regex=r'\d{20}')
+    acc_r_schet: str | None = Field(default=None, description="Р/счет (расчетный счет)", regex=r'\d{20}')
 
     @validator('acc_phone')
     def check_acc_phone(cls, acc_phone):
@@ -53,7 +53,7 @@ class AccountRegModel(BaseModel):
     def check_acc_pass(cls, acc_pass):
         try:
             ln = len(acc_pass)
-            if ln>=4 or ln<=40:
+            if ln >= 4 or ln <= 40:
                 return acc_pass
             raise ValidationError('PASSWORD ERROR')
         except Exception:

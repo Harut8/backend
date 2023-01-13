@@ -81,7 +81,7 @@ BEGIN
 						c_address)
 			VALUES(rand_id, 1 ,temp_info.*);
 			delete from temp_company where t_id  = temp_id;
-		select c_unique_id, c_email into res_data from company;
+		select c_unique_id, c_email into res_data from company where c_unique_id = rand_id;
 			check_point := true;
 		end if;
 		

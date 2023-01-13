@@ -8,6 +8,8 @@ from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AccountModel
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
 from DB_dir.db_connection import DatabaseConnection
+from starlette.responses import RedirectResponse
+
 
 account_app = APIRouter(tags=["ACCOUNT FUNCTIONALITY"])
 
@@ -102,6 +104,7 @@ def end_api_background_tasks():
 async def acc_signup(acc_reg_model: AccountModel.AccountRegModel):
     """AcRM is account registration model
     REGISTRATION API"""
+    print(acc_reg_model)
     tmp = SMa.post_acc_into_temp_db(temp_acc_model=acc_reg_model)
     if tmp:
         return {"status": "REGISTERED"}
@@ -109,13 +112,13 @@ async def acc_signup(acc_reg_model: AccountModel.AccountRegModel):
 
 
 @account_app.get(APIRoutes.acc_verify_route)
-async def acc_verify(temp_acc_id: str, data: str):
+async def acc_verify(token_verify: str, data: str):
     """VERIFY ACCOUNT SENDING EMAIL"""
-    temp_ = SMa.verify_link(temp_id=int(temp_acc_id))
-    if temp_[0]:
-        print(temp_)
-        if SMa.send_unique_code_and_pass(acc_unique_id=temp_[1], acc_email=temp_[2]):
-            return {"status": 'VERIFYING SUCCESS'}
+    temp_ = SMa.verify_link(verify_token=token_verify)
+    if temp_ is not None:
+        if SMa.send_unique_code_and_pass(acc_unique_id=temp_[0], acc_email=temp_[1]):
+            redirect_page = RedirectResponse("http://pcassa.ru/")
+            return redirect_page
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'VERIFY ERROR'})
 
 

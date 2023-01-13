@@ -13,6 +13,12 @@ class DatabaseManipulatorACCOUNT:
             hash_str = hashlib.sha256(item.acc_pass.encode())
             hash_pass = hash_str.hexdigest()
             with DBConnection.create_cursor() as cursor:
+                CHECK_ORG_NAME = """SELECT c_name,t_c_name FROM company, temp_company
+                 WHERE t_c_name = %(org_name)s or c_name = %(org_name)s"""
+                cursor.execute(CHECK_ORG_NAME, {"org_name": item.acc_org_name})
+                x = cursor.fetchone()
+                if x:
+                    return False
                 SQL_query = f"""
                                     INSERT INTO temp_company(
                                     t_c_name,
@@ -104,11 +110,11 @@ class DatabaseManipulatorACCOUNT:
                 print('SUCCESS TO VERIFY LINK')
                 data = cursor.fetchone()
                 if data is not None:
-                    return True, data
-                return False,
+                    return data
+                return
         except Exception as e:
             print(e)
-            return False,
+            return
 
     @staticmethod
     def update_verify_status(*, acc_unique_id: int):
@@ -168,6 +174,7 @@ class DatabaseManipulatorACCOUNT:
                                 WHERE c_email = %(acc_email)s AND c_pass = %(acc_pass)s"""
                 cursor.execute(SQL_query, {'acc_email': acc_email, 'acc_pass': acc_pass})
                 data = cursor.fetchone()
+                print(acc_pass, acc_email)
                 if data is None:
                     SQL_query = """SELECT c_name, d_name FROM company c
                      LEFT JOIN diller d ON c.c_diller_id = d.d_id
