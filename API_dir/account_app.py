@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter
+from fastapi import APIRouter, middleware
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
@@ -119,26 +119,27 @@ async def acc_verify(token_verify: str, data: str):
         if SMa.send_unique_code_and_pass(acc_unique_id=temp_[0], acc_email=temp_[1]):
             redirect_page = RedirectResponse("http://pcassa.ru/")
             return redirect_page
+        #add html page for errors
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'VERIFY ERROR'})
 
 
-@account_app.get(APIRoutes.acc_recovery_route)
-async def acc_recovery(receiver_email: str):
+@account_app.post(APIRoutes.acc_recovery_route+'sendemail')
+async def acc_recovery(receiver_email: AccountModel.AccRecoveryEmail):
     """SEND CODE TO EMAIL FOR RECOVERY
         GET recovery code and save it"""
-    tmp_ = SMa.recovery_code(receiver_email=receiver_email)
-    if tmp_ == False:
-        return {"status": "ERROR"}
-    SMa.recovery_code_var = tmp_
-    return {"status": "CODE SEND"}
+    tmp_ = SMa.recovery_code(receiver_email=receiver_email.receiver_email)
+    if tmp_ is not None:
+        return {"status": "OK", "data": "VERIFY CODE SENDED"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'VERIFY CODE ERROR'})
 
 
 @account_app.post(APIRoutes.acc_recovery_route)
-async def acc_recovery(code_for_verify: str):
+async def acc_recovery(item_for_verify: AccountModel.AccountVerifyModel):
     """ CHECK CODE FOR RECOVERY"""
-    if code_for_verify == SMa.recovery_code_var:
-        SMa.recovery_code_var = None
-        return {"status": "VERIFY CODE TRUE"}
+    if SMa.recovery_code_checker(
+            code_for_verify=item_for_verify.code_for_verify,
+            receiver_email=item_for_verify.receiver_email):
+        return {"status": "OK", "data": "VERIFY CODE VALID"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'CODE ERROR'})
 
 
@@ -152,7 +153,7 @@ async def acc_update_pass(acc_rec_model: AccountModel.AccountRecModel):
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'UPDATE ERROR'})
 
 
-#AcRM.AccountSignModel
+
 @account_app.post(APIRoutes.acc_login_route)
 async def signin_acc(acc_sign_model: OAuth2PasswordRequestForm = Depends()):
     """ SIGNIN CHECKING RETURN TOKENS """
@@ -199,8 +200,6 @@ async def signin_acc_info(access_token: OAuth2PasswordBearer = Depends(get_curre
         return check_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
 """-------------END OF ACCOUNT API-s-----------------"""
-
-
 
 
 

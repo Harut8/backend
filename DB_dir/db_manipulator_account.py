@@ -68,6 +68,7 @@ class DatabaseManipulatorACCOUNT:
                 return True
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return False
 
     @staticmethod
@@ -81,6 +82,7 @@ class DatabaseManipulatorACCOUNT:
                 return cursor.fetchall()[0]
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return False
 
     @staticmethod
@@ -96,6 +98,7 @@ class DatabaseManipulatorACCOUNT:
                 return True
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return False
 
     @staticmethod
@@ -114,6 +117,7 @@ class DatabaseManipulatorACCOUNT:
                 return
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return
 
     @staticmethod
@@ -129,6 +133,7 @@ class DatabaseManipulatorACCOUNT:
                 return True
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return False
 
     @staticmethod
@@ -145,6 +150,7 @@ class DatabaseManipulatorACCOUNT:
                 return True
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return False
 
     @staticmethod
@@ -159,6 +165,7 @@ class DatabaseManipulatorACCOUNT:
                 return True
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return False
 
     @staticmethod
@@ -195,6 +202,7 @@ class DatabaseManipulatorACCOUNT:
                 return data
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return
 
     @staticmethod
@@ -230,6 +238,7 @@ class DatabaseManipulatorACCOUNT:
                 return data
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return
 
     @staticmethod
@@ -245,10 +254,11 @@ class DatabaseManipulatorACCOUNT:
                 return True
         except Exception as e:
             print(e)
+            DBConnection.rollback()
             return None
 
     @staticmethod
-    def get_acc_info():
+    def decorator_for_cursor_create():
         try:
             with DBConnection.create_cursor() as cursor:
                 pass

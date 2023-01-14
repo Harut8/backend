@@ -1,4 +1,5 @@
 import jose.jwt
+import redis
 
 from DB_dir.db_manipulator_account import DatabaseManipulatorACCOUNT as DBManipulator
 from MODELS_dir.acc_model import AccountRegModel
@@ -17,13 +18,18 @@ class ServiceManipulatorACCOUNT:
     REFRESH_TOKEN_FOR_CHECK = None
     TOKEN_THREAD1 = None
     TOKEN_THREAD2 = None
+    redis_client = redis.Redis(host='127.0.0.1', port=6379)
 
     @staticmethod
     def post_acc_into_temp_db(temp_acc_model: AccountRegModel):
         """ POST DATA TO temp db
             GET id for generating unique url for verifying
             UPDATE temp db and add link to table"""
-        ServiceManipulatorACCOUNT.pass_for_email_send = temp_acc_model.acc_pass
+        ServiceManipulatorACCOUNT.redis_client.set(
+            temp_acc_model.acc_email,
+            temp_acc_model.acc_pass,
+            100)
+        #ServiceManipulatorACCOUNT.pass_for_email_send = temp_acc_model.acc_pass
         if DBManipulator.post_acc_into_temp_db(item=temp_acc_model):
             id_for_link = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)['t_id']
             id_for_link_generated_JWTencoded = jwt_logic.create_token_for_email_verify(str(id_for_link))
@@ -57,10 +63,19 @@ class ServiceManipulatorACCOUNT:
           tmp_ FOR SAVING RECOVERY CODE AND RETURN IT FOR
           CHECKING IN FUTURE"""
         tmp_ = src.send_recovery_code(receiver_email=receiver_email)
-        if tmp_[0]:
-            return tmp_[1]
+        from API_dir.api_creator import host
+
+        ServiceManipulatorACCOUNT.redis_client.set(receiver_email, tmp_, 1000)
+        if tmp_ is not None:
+            return True
         else:
-            return False
+            return
+
+    @staticmethod
+    def recovery_code_checker(*, code_for_verify: str, receiver_email: str):
+        #red_client = redis.Redis(host='127.0.0.1', port=6379)
+        code_in_db = ServiceManipulatorACCOUNT.redis_client.get(receiver_email)
+        return int(code_in_db) == int(code_for_verify)
 
     @staticmethod
     def update_acc_pass(*, acc_email: str, acc_new_pass: str):
@@ -97,15 +112,17 @@ class ServiceManipulatorACCOUNT:
         if tmp_ is not None:
             return tmp_
         return
+
     @staticmethod
     def send_unique_code_and_pass(*, acc_unique_id: str, acc_email: str):
         """ IF unique_code sent then update table verify_status"""
-        if ServiceManipulatorACCOUNT.pass_for_email_send is None:
+        pass_for_sending = ServiceManipulatorACCOUNT.redis_client.get(acc_email).decode('ascii')
+        if pass_for_sending is None:
             return False
         if sui.send_unique_id(receiver_email=acc_email,
                               message=f"Your unique code --- {acc_unique_id} ,"
                                       f" Your email --- {acc_email},"
-                                      f" Your password --- {ServiceManipulatorACCOUNT.pass_for_email_send}"):
+                                      f" Your password --- {pass_for_sending}"):
             ServiceManipulatorACCOUNT.pass_for_email_send = None
             if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
                 ServiceManipulatorACCOUNT.pass_for_email_send = None

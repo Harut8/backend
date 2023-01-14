@@ -36,7 +36,7 @@ on tc.t_c_cassa_id = cf.c_f_id
 join manager_field mf
 on tc.t_c_manager_id = mf.m_f_id 
 join sklad_field sf
-on tc.t_c_sklad_id = sf.s_f_id limit 4;
+on tc.t_c_sklad_id = sf.s_f_id order by t_month_price limit 4;
 return tarifes_table_for_return;
 end; 
 $$ 

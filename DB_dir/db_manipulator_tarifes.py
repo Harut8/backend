@@ -9,12 +9,12 @@ class DatabaseManipulatorTARIFES:
         """Returns a dict of tarifes information"""
         with DBConnection.create_cursor() as cursor:
             try:
-                cursor.execute("SELECT * from get_tarifes_for_view()")
+                cursor.execute("SELECT * from get_tarifes_for_view() limit 4")
                 temp_ = cursor.fetchall()
-                return True, temp_
+                return temp_
             except Exception as e:
                 print(e)
-                return False,
+                return None
 
     @staticmethod
     def post_tarife_to_client(*, company_id: int, tarif_id_or_info):
@@ -22,7 +22,7 @@ class DatabaseManipulatorTARIFES:
         with DBConnection.create_cursor() as cursor:
             try:
                 if isinstance(tarif_id_or_info, int):
-                    cursor.execute("INSERT INTO client_tarife (c_t_id, c_t_tarif_id)"
+                    cursor.execute("INSERT INTO client_tarif (c_t_id, c_t_tarif_id)"
                                    "VALUES ( %(company_id)s, %(tarif_id)s)",
                                    {'company_id': company_id,
                                     'tarif_id': tarif_id_or_info

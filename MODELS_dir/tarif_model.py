@@ -37,5 +37,4 @@ class PersonalTarifForClient(BaseModel):
 
 class TarifToClient(BaseModel):
     """MODEL FOR ADDING TO CLIENT"""
-    company_id: int | None = None
     tarif_id_or_info: int | PersonalTarifForClient | None = None

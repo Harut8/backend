@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+
 from .account_app import account_app
 from .tarif_app import tarif_app
 from uvicorn import run
@@ -28,6 +29,15 @@ main_app.add_middleware(
 @main_app.get('/')
 def main_route():
     return {'status': 'SERVER RUNNING'}
+
+
+@main_app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    x = request.query_params
+    print(request.url)
+    print(request.query_params)
+    response = await call_next(request)
+    return response
 
 
 def start_server():

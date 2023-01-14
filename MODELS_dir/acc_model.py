@@ -66,6 +66,39 @@ class AccountRecModel(BaseModel):
     acc_new_pass: str
 
 
+class AccountVerifyModel(BaseModel):
+    receiver_email: str
+    code_for_verify: int
+
+    @validator('code_for_verify')
+    def check_verify_type(cls, code):
+        try:
+            if isinstance(code, int) and len(str(code)) == 9:
+                return code
+            raise ValidationError('CODE ERROR')
+        except Exception:
+            raise ValidationError('CODE ERROR')
+
+    @validator('receiver_email')
+    def check_acc_email(cls, acc_email):
+        try:
+            if validate_email(acc_email):
+                return acc_email
+        except Exception:
+            raise ValidationError('EMAIL ERROR')
+
+
+class AccRecoveryEmail(BaseModel):
+    receiver_email: str
+
+    @validator('receiver_email')
+    def check_acc_email(cls, acc_email):
+        try:
+            if validate_email(acc_email):
+                return acc_email
+        except Exception:
+            raise ValidationError('EMAIL ERROR')
+
 class AccountSignModel(BaseModel):
     """ MODEL FOR ACCOUNT SIGNIN """
     username: str

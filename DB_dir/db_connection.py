@@ -72,6 +72,10 @@ class DatabaseConnection:
         return DatabaseConnection.__run().cursor(cursor_factory=sql_dict.RealDictCursor)
 
     @classmethod
+    def rollback(cls):
+        cls.uniqueInstance.__connection.rollback()
+
+    @classmethod
     def commit(cls):
         """TRY TO SAVE CHANGES AFTER MANIPULATING"""
         if cls.uniqueInstance.__connection:

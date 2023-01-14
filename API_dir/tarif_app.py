@@ -15,15 +15,15 @@ tarif_app = APIRouter(tags=["TARIF FUNCTIONALITY"])
 def get_tarifes_for_view_route(access_token: OAuth2PasswordBearer = Depends(get_current_user)):
     """ GET ALL POSSIBLE TARIFES FOR VIEW """
     temp_ = SMt.get_tarifes_for_view()
-    if temp_[0]:
-        return temp_[1]
+    if temp_ is not None:
+        return temp_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'TARIF VIEW ERROR'})
 
 
 @tarif_app.post(APIRoutes.post_tarife_to_client)
 def post_tarife_to_client(tarif_for_client: TarifToClient, access_token: OAuth2PasswordBearer = Depends(get_current_user)):
     """ POST TARIFE FOR CLIENT """
-    if SMt.post_tarif_to_company(tarif=tarif_for_client):
+    if SMt.post_tarif_to_company(tarif=tarif_for_client, client_token=access_token):
         return {"status": "TARIF ADDED TO CLIENT"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'TARIF ADD ERROR'})
 
