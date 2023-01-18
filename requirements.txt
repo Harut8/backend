@@ -1,6 +1,9 @@
-fastapi
-pydantic
-uvicorn
+fastapi~=0.88.0
+pydantic~=1.10.2
+uvicorn~=0.20.0
 email_validator
-psycopg2
+psycopg2~=2.9.3
 python-multipart
+jose
+starlette~=0.22.0
+redis~=4.4.2

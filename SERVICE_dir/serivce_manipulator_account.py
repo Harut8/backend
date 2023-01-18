@@ -74,8 +74,13 @@ class ServiceManipulatorACCOUNT:
     @staticmethod
     def recovery_code_checker(*, code_for_verify: str, receiver_email: str):
         #red_client = redis.Redis(host='127.0.0.1', port=6379)
-        code_in_db = ServiceManipulatorACCOUNT.redis_client.get(receiver_email)
-        return int(code_in_db) == int(code_for_verify)
+        try:
+            code_in_db = ServiceManipulatorACCOUNT.redis_client.get(receiver_email)
+            print(code_in_db, code_for_verify)
+            return int(code_in_db) == int(code_for_verify)
+        except Exception as e:
+            print(e)
+            return False
 
     @staticmethod
     def update_acc_pass(*, acc_email: str, acc_new_pass: str):

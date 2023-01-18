@@ -99,6 +99,7 @@ class AccRecoveryEmail(BaseModel):
         except Exception:
             raise ValidationError('EMAIL ERROR')
 
+
 class AccountSignModel(BaseModel):
     """ MODEL FOR ACCOUNT SIGNIN """
     username: str
