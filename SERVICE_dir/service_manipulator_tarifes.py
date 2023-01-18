@@ -14,25 +14,29 @@ class ServiceManipulatorTARIFES:
     def get_tarifes_for_view():
         """Returns tarifes table for view"""
         temp_ = DatabaseManipulatorTARIFES.get_tarifes_for_view()
-        if temp_ is not None:
-            data_for_view = [
-                TarifModelForView(
-                    tarif_names=i['tarif_names'],
-                    tarif_month_prices=i['tarif_month_prices'],
-                    inner_content=InnerModelForTarif(
-                        cassa_names=i['cassa_names'],
-                        cassa_counts=i['cassa_counts'],
-                        manager_names=i['manager_names'],
-                        manager_counts=i['manager_counts'],
-                        sklad_names=i['sklad_names'],
-                        sklad_counts=i['sklad_counts'],
-                        tarifes_others=i['tarifes_others'],)
-                )
-                for i in temp_
-            ]
-            return data_for_view
-        else:
-            return None
+        try:
+            if temp_ is not None:
+                data_for_view = [
+                    TarifModelForView(
+                        tarif_names=i['tarif_names'],
+                        tarif_month_prices=i['tarif_month_prices'],
+                        inner_content=InnerModelForTarif(
+                            cassa_names=i['cassa_names'],
+                            cassa_counts=i['cassa_counts'],
+                            manager_names=i['manager_names'],
+                            manager_counts=i['manager_counts'],
+                            sklad_names=i['sklad_names'],
+                            sklad_counts=i['sklad_counts'],
+                            tarifes_others=i['tarifes_others'],)
+                    )
+                    for i in temp_
+                ]
+                return data_for_view
+            else:
+                return None
+        except Exception as e:
+            print(e)
+            return
 
     @staticmethod
     def post_tarif_to_company(*, tarif: TarifToClient, client_token: str):

@@ -25,37 +25,46 @@ class ServiceManipulatorACCOUNT:
         """ POST DATA TO temp db
             GET id for generating unique url for verifying
             UPDATE temp db and add link to table"""
-        ServiceManipulatorACCOUNT.redis_client.set(
-            temp_acc_model.acc_email,
-            temp_acc_model.acc_pass,
-            100)
-        #ServiceManipulatorACCOUNT.pass_for_email_send = temp_acc_model.acc_pass
-        if DBManipulator.post_acc_into_temp_db(item=temp_acc_model):
-            id_for_link = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)['t_id']
-            id_for_link_generated_JWTencoded = jwt_logic.create_token_for_email_verify(str(id_for_link))
-            generated_link = ves.generate_url(id_=id_for_link_generated_JWTencoded)
-            if ves.send_verify_link(receiver_email=temp_acc_model.acc_email, message=generated_link):
-                DBManipulator.post_link_into_temp_company(link=generated_link, name=temp_acc_model.acc_org_name)
-                return True
+        try:
+
+            ServiceManipulatorACCOUNT.redis_client.set(
+                temp_acc_model.acc_email,
+                temp_acc_model.acc_pass,
+                600)
+            #ServiceManipulatorACCOUNT.pass_for_email_send = temp_acc_model.acc_pass
+            if DBManipulator.post_acc_into_temp_db(item=temp_acc_model):
+                id_for_link = DBManipulator.get_id_from_temp_db(name=temp_acc_model.acc_org_name)['t_id']
+                id_for_link_generated_JWTencoded = jwt_logic.create_token_for_email_verify(str(id_for_link))
+                generated_link = ves.generate_url(id_=id_for_link_generated_JWTencoded)
+                if ves.send_verify_link(receiver_email=temp_acc_model.acc_email, message=generated_link):
+                    DBManipulator.post_link_into_temp_company(link=generated_link, name=temp_acc_model.acc_org_name)
+                    return True
+                else:
+                    DBManipulator.delete_data_from_temp_if_failed(acc_email=temp_acc_model.acc_email)
+                    return False
             else:
                 DBManipulator.delete_data_from_temp_if_failed(acc_email=temp_acc_model.acc_email)
                 return False
-        else:
-            DBManipulator.delete_data_from_temp_if_failed(acc_email=temp_acc_model.acc_email)
+        except Exception as e:
+            print(e)
             return False
 
     @staticmethod
     def verify_link(*, verify_token: str):
         """ verify email using temp id """
-        temp_id = jose.jwt.decode(verify_token,
-                                  jwt_logic.JWTParamas.VERIFY_SECRET_KEY,
-                                  jwt_logic.JWTParamas.ALGORITHM)['sub']
-        temp_ = DBManipulator.verify_link(temp_id=int(temp_id))
-        if temp_ is not None:
-            data = temp_['del_tmp_add_company'][1:-1].split(',')
-            return data
-        else:
-            return None
+        try:
+            temp_id = jose.jwt.decode(verify_token,
+                                      jwt_logic.JWTParamas.VERIFY_SECRET_KEY,
+                                      jwt_logic.JWTParamas.ALGORITHM)['sub']
+            temp_ = DBManipulator.verify_link(temp_id=int(temp_id))
+            if temp_ is not None:
+                data = temp_['del_tmp_add_company'][1:-1].split(',')
+                return data
+            else:
+                return None
+        except Exception as e:
+            print(e)
+            return
 
     @staticmethod
     def recovery_code(*, receiver_email: str):
@@ -64,11 +73,14 @@ class ServiceManipulatorACCOUNT:
           CHECKING IN FUTURE"""
         tmp_ = src.send_recovery_code(receiver_email=receiver_email)
         from API_dir.api_creator import host
-
-        ServiceManipulatorACCOUNT.redis_client.set(receiver_email, tmp_, 1000)
-        if tmp_ is not None:
-            return True
-        else:
+        try:
+            ServiceManipulatorACCOUNT.redis_client.set(receiver_email, tmp_, 1000)
+            if tmp_ is not None:
+                return True
+            else:
+                return
+        except Exception as e:
+            print(e)
             return
 
     @staticmethod
@@ -96,20 +108,24 @@ class ServiceManipulatorACCOUNT:
             START THREADS FOR CHANGING TOKEN EVERY 30 MINUTE
         """
         tmp_ = DBManipulator.signin_acc(acc_email=acc_email, acc_pass=acc_pass)
-        if tmp_ is not None:
-            from threading import Timer, Event
-            ServiceManipulatorACCOUNT.TOKEN_THREAD1 = Timer(
-                30, ServiceManipulatorACCOUNT.signin_acc,
-                [acc_email, acc_pass]
-            )
-            ServiceManipulatorACCOUNT.TOKEN_THREAD2 = Timer(
-                30, ServiceManipulatorACCOUNT.auto_update_token_for_account,
-                args=[tmp_]
-            )
-            ServiceManipulatorACCOUNT.TOKEN_THREAD1.start()
-            ServiceManipulatorACCOUNT.TOKEN_THREAD2.start()
-            return tmp_
-        return
+        try:
+            if tmp_ is not None:
+                from threading import Timer, Event
+                ServiceManipulatorACCOUNT.TOKEN_THREAD1 = Timer(
+                    30, ServiceManipulatorACCOUNT.signin_acc,
+                    [acc_email, acc_pass]
+                )
+                ServiceManipulatorACCOUNT.TOKEN_THREAD2 = Timer(
+                    30, ServiceManipulatorACCOUNT.auto_update_token_for_account,
+                    args=[tmp_]
+                )
+                ServiceManipulatorACCOUNT.TOKEN_THREAD1.start()
+                ServiceManipulatorACCOUNT.TOKEN_THREAD2.start()
+                return tmp_
+            return
+        except Exception as e:
+            print(e)
+            return
 
     @staticmethod
     def signin_acc_info(*, acc_token: str):
@@ -121,19 +137,24 @@ class ServiceManipulatorACCOUNT:
     @staticmethod
     def send_unique_code_and_pass(*, acc_unique_id: str, acc_email: str):
         """ IF unique_code sent then update table verify_status"""
-        pass_for_sending = ServiceManipulatorACCOUNT.redis_client.get(acc_email).decode('ascii')
-        if pass_for_sending is None:
-            return False
-        if sui.send_unique_id(receiver_email=acc_email,
-                              message=f"Your unique code --- {acc_unique_id} ,"
-                                      f" Your email --- {acc_email},"
-                                      f" Your password --- {pass_for_sending}"):
-            ServiceManipulatorACCOUNT.pass_for_email_send = None
-            if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
+        try:
+            pass_for_sending = ServiceManipulatorACCOUNT.redis_client.get(acc_email)
+            if pass_for_sending is None:
+                return False
+            pass_for_sending = pass_for_sending.decode('ascii')
+            if sui.send_unique_id(receiver_email=acc_email,
+                                  message=f"Your unique code --- {acc_unique_id} ,"
+                                          f" Your email --- {acc_email},"
+                                          f" Your password --- {pass_for_sending}"):
                 ServiceManipulatorACCOUNT.pass_for_email_send = None
-                return True
-        ServiceManipulatorACCOUNT.pass_for_email_send = None
-        return False
+                if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
+                    ServiceManipulatorACCOUNT.pass_for_email_send = None
+                    return True
+            ServiceManipulatorACCOUNT.pass_for_email_send = None
+            return False
+        except Exception as e:
+            print(e)
+            return False
 
     @staticmethod
     def add_access_token_to_account(*, access_token: str, account_id: str):
@@ -153,14 +174,18 @@ class ServiceManipulatorACCOUNT:
     @staticmethod
     def auto_update_token_for_account(account_object=None):
         """AUTOMATICLY UPDATE TOKENS FOR ACCOUNT"""
-        if account_object is not None:
-            jwt_logic.change_secret_keys()
-            __ACCESS_TOKEN = jwt_logic.create_access_token(account_object)
-            if ServiceManipulatorACCOUNT.add_access_token_to_account(
-                access_token=__ACCESS_TOKEN,
-                account_id=account_object['c_id']):
-                return True
-        return
+        try:
+            if account_object is not None:
+                jwt_logic.change_secret_keys()
+                __ACCESS_TOKEN = jwt_logic.create_access_token(account_object)
+                if ServiceManipulatorACCOUNT.add_access_token_to_account(
+                    access_token=__ACCESS_TOKEN,
+                    account_id=account_object['c_id']):
+                    return True
+            return
+        except Exception as e:
+            print(e)
+            return False
 
 
 
