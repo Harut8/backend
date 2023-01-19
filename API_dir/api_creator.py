@@ -35,9 +35,9 @@ def main_route():
 
 @main_app.on_event('shutdown')
 def end_api_background_tasks():
-    if SMa.TOKEN_THREAD1 is not None and SMa.TOKEN_THREAD2 is not None:
-        SMa.TOKEN_THREAD1.cancel()
-        SMa.TOKEN_THREAD2.cancel()
+    # if SMa.TOKEN_THREAD1 is not None and SMa.TOKEN_THREAD2 is not None:
+    #     SMa.TOKEN_THREAD1.cancel()
+    #     SMa.TOKEN_THREAD2.cancel()
     DatabaseConnection.close()
 
 @main_app.middleware("http")

@@ -40,8 +40,12 @@ class ServiceManipulatorTARIFES:
 
     @staticmethod
     def post_tarif_to_company(*, tarif: TarifToClient, client_token: str):
+        """ ADD TARIF TO CLIENT USING TOKEN"""
         try:
-            id_ = jose.jwt.decode(client_token, JWTParamas.SECRET_KEY, JWTParamas.ALGORITHM)['sub']
+            id_ = jose.jwt.decode(
+                client_token,
+                JWTParamas.ACCESS_SECRET_KEY,
+                JWTParamas.ALGORITHM)['sub'].replace(JWTParamas.SOLD_KEY, "")
             temp_ = DatabaseManipulatorTARIFES.post_tarife_to_client(
                 company_id=id_,
                 tarif_id_or_info=tarif.tarif_id_or_info)

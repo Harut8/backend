@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
-from fastapi import APIRouter, middleware
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, BackgroundTasks
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
@@ -7,7 +7,6 @@ from SERVICE_dir.jwt_logic import JWTParamas, create_access_token, create_refres
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AccountModel
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
-from DB_dir.db_connection import DatabaseConnection
 from starlette.responses import RedirectResponse
 
 
@@ -25,12 +24,18 @@ reuseable_oauth = OAuth2PasswordBearer(
 )
 
 
+"""
+##############################
+RETURN TOKEN OF CURRENT USER IF ALL ARE OK
+IN FUTURE WILL DECODE AND GET ID OF CLIENT
+##############################
+"""
 async def get_current_user(token: str = Depends(reuseable_oauth)):
     """CHECK INVALID TOKENS
        CHECK EXPIRED TOKENS"""
     try:
         payload = jwt.decode(
-            token, JWTParamas.SECRET_KEY, algorithms=[JWTParamas.ALGORITHM]
+            token, JWTParamas.ACCESS_SECRET_KEY, algorithms=[JWTParamas.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
         if token_data.exp < datetime.utcnow().replace(tzinfo=timezone.utc):
@@ -49,30 +54,12 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
         )
 
 
-async def get_id_for_refresh(token: str = Depends(reuseable_oauth)):
-    """CHECK INVALID TOKENS
-       CHECK EXPIRED TOKENS"""
-    try:
-        payload = jwt.decode(
-            token, JWTParamas.SECRET_KEY, algorithms=[JWTParamas.ALGORITHM]
-        )
-        token_data = TokenPayload(**payload)
-        if token_data.exp < datetime.utcnow().replace(tzinfo=timezone.utc):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="ERROR",
-                headers={"WWW-Authenticate": "EXPIRED TIME"},
-            )
-        return token_data.sub
-    except Exception as e:
-        print(e)
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="ERROR",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+async def update_token_of_user(account_id, access_token):
+    SMa.auto_update_token_for_account(account_id=account_id, access_token=access_token)
 
 
+async def send_verify_email(*arg):
+    SMa.call_async_function(acc_email=arg[0], generated_link=arg[1])
 
 """ #################################
                    END
@@ -93,12 +80,14 @@ async def get_id_for_refresh(token: str = Depends(reuseable_oauth)):
 
 
 @account_app.post(APIRoutes.acc_register_route)
-async def acc_signup(acc_reg_model: AccountModel.AccountRegModel):
+async def acc_signup(acc_reg_model: AccountModel.AccountRegModel, back_task: BackgroundTasks):
     """AcRM is account registration model
     REGISTRATION API"""
-    print(acc_reg_model)
-    tmp = SMa.post_acc_into_temp_db(temp_acc_model=acc_reg_model)
-    if tmp:
+    tmp = await SMa.post_acc_into_temp_db(temp_acc_model=acc_reg_model)
+    if tmp is not None:
+        if tmp == "ka":
+            raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTR DATA ERROR'})
+        back_task.add_task(send_verify_email, tmp[0], tmp[1])
         return {"status": "REGISTERED"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTR ERROR'})
 
@@ -145,7 +134,6 @@ async def acc_update_pass(acc_rec_model: AccountModel.AccountRecModel):
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'UPDATE ERROR'})
 
 
-
 @account_app.post(APIRoutes.acc_login_route)
 async def signin_acc(acc_sign_model: OAuth2PasswordRequestForm = Depends()):
     """ SIGNIN CHECKING RETURN TOKENS """
@@ -171,17 +159,40 @@ async def signin_acc(acc_sign_model: OAuth2PasswordRequestForm = Depends()):
 @account_app.post(APIRoutes.acc_refresh_token)
 def check_and_send_new_token(
                        refresh_token: str,
-                       access_token: OAuth2PasswordBearer = Depends(get_id_for_refresh)
+                       callback_after_successful_cheking: BackgroundTasks,
+                       access_token: OAuth2PasswordBearer = Depends(get_current_user),
                        ):
     """CHECK SENDED REFRESH TOKEN AFTER
        THIS REFRESH ALL TOKENS AND SEND NEW"""
-    if SMa.check_refresh_token(client_refresh_token=refresh_token):
-        create_refresh_token(access_token)
-        return {
-            "access_token": SMa.ACCESS_TOKEN_FOR_CHECK,
-            "refresh_token": SMa.REFRESH_TOKEN_FOR_CHECK
-        }
-    raise HTTPException(status_code=401, detail="ERROR", headers={'status': 'TOKEN UPDATE ERROR'})
+    try:
+        #decode refresh token and get all information about client
+        refresh_decoded_dict = jwt.decode(refresh_token,
+                                  JWTParamas.REFRESH_SECRET_KEY,
+                                  JWTParamas.ALGORITHM)
+        refresh_info = TokenPayload(**refresh_decoded_dict)
+        refresh_timeout = refresh_info.exp
+        refresh_id = refresh_info.sub.replace(JWTParamas.SOLD_KEY, "")
+        now_ = datetime.utcnow().replace(tzinfo=timezone.utc)
+        #check time of refresh_token
+        if now_ < refresh_timeout and \
+                (timedelta(minutes=1) < refresh_timeout - now_ < timedelta(minutes=65)):
+            if SMa.check_refresh_token(client_id=refresh_id,
+                                       client_refresh_token=refresh_token):
+                access_token_ = create_access_token(refresh_id)
+                refresh_token_ = create_refresh_token(refresh_id)
+                #update db with new token
+                callback_after_successful_cheking.add_task(
+                    update_token_of_user,
+                    refresh_id,
+                    access_token_)
+                return {
+                    "access_token": access_token_,
+                    "refresh_token": refresh_token_
+                }
+        raise HTTPException(status_code=401, detail="ERROR", headers={'status': 'TOKEN UPDATE ERROR'})
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=401, detail="ERROR", headers={'status': 'TOKEN UPDATE ERROR'})
 
 
 @account_app.get(APIRoutes.acc_login_route)

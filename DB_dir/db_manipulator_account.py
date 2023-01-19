@@ -13,12 +13,28 @@ class DatabaseManipulatorACCOUNT:
             hash_str = hashlib.sha256(item.acc_pass.encode())
             hash_pass = hash_str.hexdigest()
             with DBConnection.create_cursor() as cursor:
-                CHECK_ORG_NAME = """SELECT c_name,t_c_name FROM company, temp_company
-                 WHERE t_c_name = %(org_name)s or c_name = %(org_name)s"""
-                cursor.execute(CHECK_ORG_NAME, {"org_name": item.acc_org_name})
-                x = cursor.fetchone()
-                if x:
-                    return False
+                CHECK_ORG_NAME_IN_TEMP = """
+                 SELECT c_name, c_email, c_phone FROM company
+                 WHERE c_name = %(org_name)s or 
+                 c_email = %(acc_email)s 
+                 or 
+                 c_phone = %(acc_phone)s"""
+                cursor.execute(CHECK_ORG_NAME_IN_TEMP,
+                               {"org_name": item.acc_org_name,
+                                "acc_email": item.acc_email,
+                                "acc_phone": item.acc_phone
+                                })
+                check_are_there_company_with_these_params = cursor.fetchone()
+                if check_are_there_company_with_these_params:
+                    return 'ka'
+                cursor.execute("DELETE  FROM temp_company WHERE t_c_name = %(org_name)s"
+                               " or"
+                               " t_c_email = %(acc_email)s"
+                               " or t_c_phone = %(acc_phone)s",
+                               {"org_name": item.acc_org_name,
+                                "acc_email": item.acc_email,
+                                "acc_phone": item.acc_phone
+                                })
                 SQL_query = f"""
                                     INSERT INTO temp_company(
                                     t_c_name,
@@ -86,7 +102,7 @@ class DatabaseManipulatorACCOUNT:
             return False
 
     @staticmethod
-    def post_link_into_temp_company(*, link, name):
+    async def post_link_into_temp_company(*, link, name):
         """ AFTER ADDING User to temp_company
             generate link and update column"""
         try:
@@ -241,21 +257,21 @@ class DatabaseManipulatorACCOUNT:
             DBConnection.rollback()
             return
 
-    @staticmethod
-    def add_access_token_to_account(*, access_token: str, account_id: str):
-        try:
-            with DBConnection.create_cursor() as cursor:
-                cursor.execute(
-                    """ UPDATE company SET c_token = %(access_token)s WHERE c_id = %(account_id)s""",
-                    {'access_token': access_token,
-                     'account_id': account_id
-                     })
-                DBConnection.commit()
-                return True
-        except Exception as e:
-            print(e)
-            DBConnection.rollback()
-            return None
+    # @staticmethod
+    # def add_access_token_to_account(*, access_token: str, account_id: str):
+    #     try:
+    #         with DBConnection.create_cursor() as cursor:
+    #             cursor.execute(
+    #                 """ UPDATE company SET c_token = %(access_token)s WHERE c_id = %(account_id)s""",
+    #                 {'access_token': access_token,
+    #                  'account_id': account_id
+    #                  })
+    #             DBConnection.commit()
+    #             return True
+    #     except Exception as e:
+    #         print(e)
+    #         DBConnection.rollback()
+    #         return None
 
     @staticmethod
     def decorator_for_cursor_create():
