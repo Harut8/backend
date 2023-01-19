@@ -28,7 +28,7 @@ def create_access_token(subject_id: Any, expires_delta: int = None) -> str:
 
 
 def create_token_for_email_verify(subject_id: str):
-    to_encode = {"sub": subject_id}
+    to_encode = {"sub": subject_id, "exp": datetime.utcnow() + timedelta(minutes=60),}
     encoded_jwt = jwt.encode(to_encode, JWTParamas.VERIFY_SECRET_KEY, JWTParamas.ALGORITHM)
     return encoded_jwt
 
