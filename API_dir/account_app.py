@@ -81,14 +81,6 @@ async def get_id_for_refresh(token: str = Depends(reuseable_oauth)):
 """
 
 
-@account_app.on_event('shutdown')
-def end_api_background_tasks():
-    if SMa.TOKEN_THREAD1 is not None and SMa.TOKEN_THREAD2 is not None:
-        SMa.TOKEN_THREAD1.cancel()
-        SMa.TOKEN_THREAD2.cancel()
-    DatabaseConnection.close()
-
-
 
 """ --------------START ACCOUNT API-s---------------
 --- account signup 

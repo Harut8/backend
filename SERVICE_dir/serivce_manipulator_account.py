@@ -56,6 +56,7 @@ class ServiceManipulatorACCOUNT:
             temp_id = jose.jwt.decode(verify_token,
                                       jwt_logic.JWTParamas.VERIFY_SECRET_KEY,
                                       jwt_logic.JWTParamas.ALGORITHM)['sub']
+            #check expires for token ANEL
             temp_ = DBManipulator.verify_link(temp_id=int(temp_id))
             if temp_ is not None:
                 data = temp_['del_tmp_add_company'][1:-1].split(',')

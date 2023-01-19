@@ -5,6 +5,8 @@ from .tarif_app import tarif_app
 from uvicorn import run
 from fastapi.middleware.cors import CORSMiddleware
 from configparser import ConfigParser
+from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
+from DB_dir.db_connection import DatabaseConnection
 
 conf = ConfigParser()
 conf.read('API_dir/API_CONFIG.ini')
@@ -30,6 +32,13 @@ main_app.add_middleware(
 def main_route():
     return {'status': 'SERVER RUNNING'}
 
+
+@main_app.on_event('shutdown')
+def end_api_background_tasks():
+    if SMa.TOKEN_THREAD1 is not None and SMa.TOKEN_THREAD2 is not None:
+        SMa.TOKEN_THREAD1.cancel()
+        SMa.TOKEN_THREAD2.cancel()
+    DatabaseConnection.close()
 
 @main_app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
