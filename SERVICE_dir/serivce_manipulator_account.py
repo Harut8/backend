@@ -20,7 +20,6 @@ class ServiceManipulatorACCOUNT:
 
     @staticmethod
     def call_async_function(acc_email, generated_link,):
-        print('anuma')
         ves.send_verify_link(receiver_email=acc_email,
                                  message=generated_link)
 
@@ -158,9 +157,9 @@ class ServiceManipulatorACCOUNT:
     @staticmethod
     def add_access_token_to_account(*, access_token: str, account_id: str):
         """UPDATE ACCOUNT TOKEN"""
-        if DBManipulator.add_access_token_to_account(
+        if DBManipulator.update_acc_token(
                 access_token=access_token,
-                account_id=str(account_id)):
+                acc_id=str(account_id)):
             return True
         return False
 

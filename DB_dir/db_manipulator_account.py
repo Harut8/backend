@@ -170,6 +170,23 @@ class DatabaseManipulatorACCOUNT:
             return False
 
     @staticmethod
+    def update_acc_token(*, access_token: str, acc_id: str):
+        """ UPDATE TOKEN OF ACCOUNT"""
+        try:
+            with DBConnection.create_cursor() as cursor:
+                SQL_query = f"""UPDATE company SET c_token = %(access_token)s WHERE c_id = %(c_id)s"""
+                cursor.execute(SQL_query,
+                               {'access_token': access_token,
+                                'c_id': acc_id})
+                DBConnection.commit()
+                print('SUCCESSFULLY UPDATING TOKEN')
+                return True
+        except Exception as e:
+            print(e)
+            DBConnection.rollback()
+            return False
+
+    @staticmethod
     def delete_data_from_temp_if_failed(*, acc_email: str):
         """ DELETE ROW FROM temp_company IF EMAIL FAILED """
         try:
