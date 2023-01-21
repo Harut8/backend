@@ -45,6 +45,7 @@ async def add_process_time_header(request: Request, call_next):
     x = request.query_params
     print(request.url)
     print(request.query_params)
+    print(request.headers)
     #print(await request.body())
     response = await call_next(request)
     return response
@@ -52,7 +53,7 @@ async def add_process_time_header(request: Request, call_next):
 
 def start_server():
     """Start server"""
-    run(main_app, host=host)
+    run(main_app, host='localhost')
 
 
 #192.168.3.250

@@ -7,3 +7,4 @@ python-multipart
 jose
 starlette~=0.22.0
 redis~=4.4.2
+num2words~=0.5.12

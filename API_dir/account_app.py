@@ -30,6 +30,8 @@ RETURN TOKEN OF CURRENT USER IF ALL ARE OK
 IN FUTURE WILL DECODE AND GET ID OF CLIENT
 ##############################
 """
+
+
 async def get_current_user(token: str = Depends(reuseable_oauth)):
     """CHECK INVALID TOKENS
        CHECK EXPIRED TOKENS"""
@@ -105,7 +107,7 @@ async def acc_verify(token_verify: str, data: str):
 
 
 @account_app.post(APIRoutes.acc_recovery_route+'sendemail')
-async def acc_recovery(receiver_email: AccountModel.AccRecoveryEmail):
+async def acc_recovery_sender(receiver_email: AccountModel.AccRecoveryEmail):
     """SEND CODE TO EMAIL FOR RECOVERY
         GET recovery code and save it"""
     tmp_ = SMa.recovery_code(receiver_email=receiver_email.receiver_email)
@@ -115,7 +117,7 @@ async def acc_recovery(receiver_email: AccountModel.AccRecoveryEmail):
 
 
 @account_app.post(APIRoutes.acc_recovery_route)
-async def acc_recovery(item_for_verify: AccountModel.AccountVerifyModel):
+async def acc_recovery_checker(item_for_verify: AccountModel.AccountVerifyModel):
     """ CHECK CODE FOR RECOVERY"""
     if SMa.recovery_code_checker(
             code_for_verify=item_for_verify.code_for_verify,
@@ -124,13 +126,13 @@ async def acc_recovery(item_for_verify: AccountModel.AccountVerifyModel):
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'CODE ERROR'})
 
 
-@account_app.put(APIRoutes.acc_update_pass)
+@account_app.post(APIRoutes.acc_update_pass)
 async def acc_update_pass(acc_rec_model: AccountModel.AccountRecModel):
     """ UPDATE PASS OF USER """
     if SMa.update_acc_pass(
             acc_email=acc_rec_model.acc_email,
             acc_new_pass=acc_rec_model.acc_new_pass):
-        return {"status": "UPDATE PASSWORD IS SUCCESSFUL"}
+        return {"status": "ok"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'UPDATE ERROR'})
 
 
@@ -174,8 +176,7 @@ def check_and_send_new_token(
         refresh_id = refresh_info.sub.replace(JWTParamas.SOLD_KEY, "")
         now_ = datetime.utcnow().replace(tzinfo=timezone.utc)
         #check time of refresh_token
-        if now_ < refresh_timeout and \
-                (timedelta(minutes=1) < refresh_timeout - now_ < timedelta(minutes=65)):
+        if now_ < refresh_timeout:
             if SMa.check_refresh_token(client_id=refresh_id,
                                        client_refresh_token=refresh_token):
                 access_token_ = create_access_token(refresh_id)

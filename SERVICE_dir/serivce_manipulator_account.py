@@ -20,9 +20,9 @@ class ServiceManipulatorACCOUNT:
 
     @staticmethod
     def call_async_function(acc_email, generated_link,):
-        ves.send_verify_link(receiver_email=acc_email,
-                                 message=generated_link)
-
+        ves.send_verify_link(
+            receiver_email=acc_email,
+            message=generated_link)
 
     @staticmethod
     async def post_acc_into_temp_db(temp_acc_model: AccountRegModel):
