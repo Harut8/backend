@@ -83,10 +83,10 @@ class ExcelAnketaRewriter:
             sheet["D14"] = tarif_info.mcc
             sheet["D15"] = tarif_info.wmc
             sheet["D16"] = tarif_info.mmc
-            sheet["G13"] = personal_prices.cass_stantion_price or 0
-            sheet["G14"] = personal_prices.mobile_cass_price or 0
-            sheet["G15"] = personal_prices.web_manager_price or 0
-            sheet["G16"] = personal_prices.mobile_manager_price or 0
+            sheet["G13"] = int(personal_prices.cass_stantion_price) or 0
+            sheet["G14"] = int(personal_prices.mobile_cass_price) or 0
+            sheet["G15"] = int(personal_prices.web_manager_price) or 0
+            sheet["G16"] = int(personal_prices.mobile_manager_price) or 0
             sheet["H13"] = (personal_prices.cass_stantion_price or 0)*tarif_info.csc
             sheet["H14"] = (personal_prices.mobile_cass_price or 0)*tarif_info.mcc
             sheet["H15"] = (personal_prices.web_manager_price or 0)*tarif_info.wmc

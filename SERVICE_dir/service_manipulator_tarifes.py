@@ -1,5 +1,6 @@
 import jose.jwt
 from SERVICE_dir.jwt_logic import JWTParamas
+from SERVICE_dir.send_excel import send_mail
 from DB_dir.db_manipulator_tarifes import DatabaseManipulatorTARIFES
 from MODELS_dir.tarif_model import (TarifModelForView,
                                     InnerModelForTarif,
@@ -32,6 +33,16 @@ class ServiceManipulatorTARIFES:
         except Exception as e:
             print(e)
             return
+
+    @staticmethod
+    def send_link_excel_download(order_id):
+        info_ = DatabaseManipulatorTARIFES.get_email_for_excel(order_id)
+        print(info_, "hasav")
+        if info_:
+            if send_mail(info_["c_email"], order_id):
+                print("success")
+                return True
+        return
 
     @staticmethod
     def post_transfer_tarif(
@@ -70,8 +81,8 @@ class ServiceManipulatorTARIFES:
                             cassa_counts=i['cassa_counts'],
                             manager_names=i['manager_names'][lan_],
                             manager_counts=i['manager_counts'],
-                            sklad_names=i['sklad_names'][lan_],
-                            sklad_counts=i['sklad_counts'],
+                            web_names=i['web_names'][lan_],
+                            web_counts=i['web_counts'],
                             mobile_cassa_names=i['mobile_cassa_names'][lan_],
                             mobile_cassa_counts=i['mobile_cassa_counts'],
                             tarifes_others=i['tarifes_others'],)
@@ -129,18 +140,21 @@ class ServiceManipulatorTARIFES:
     def get_tarifes_for_personal_crateing(language):
         try:
             temp_ = DatabaseManipulatorTARIFES.get_tarifes_for_personal()
+            #print(temp_)
             lan_ = language_dict[language]
             if temp_ is None:
                 return
             else:
                 #return temp_
                 return PersonalTarifForView(
-                cass_stantion_name=temp_[0]["c_f_name"][lan_],
-                cass_stantion_price=temp_[0]["c_per_price"],
-                mobile_cass_name=temp_[1]["c_f_name"][lan_],
-                mobile_cass_price=temp_[1]["c_per_price"],
-                mobile_manager_name=temp_[3]["c_f_name"][lan_],
-                mobile_manager_price=temp_[3]["c_per_price"],
+                cass_stantion_name=temp_[3]["c_f_name"][lan_],
+                cass_stantion_price=temp_[3]["c_per_price"],
+                mobile_cass_name=temp_[2]["c_f_name"][lan_],
+                mobile_cass_price=temp_[2]["c_per_price"],
+                mobile_manager_name=temp_[0]["c_f_name"][lan_],
+                mobile_manager_price=temp_[0]["c_per_price"],
+                web_manager_name =temp_[1]["c_f_name"][lan_],
+                web_manager_price=temp_[1]["c_per_price"],
 
                 )
         except Exception as e:

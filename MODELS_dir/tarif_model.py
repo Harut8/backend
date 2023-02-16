@@ -7,8 +7,8 @@ class InnerModelForTarif(BaseModel):
     cassa_counts: int = None
     manager_names: str = None
     manager_counts: int = None
-    sklad_names: str = None
-    sklad_counts: int = None
+    web_names: str = None
+    web_counts: int = None
     mobile_cassa_names: str = None
     mobile_cassa_counts: int = None
     tarifes_others: list[str] = None

@@ -17,9 +17,10 @@ async def excel_creator(order_id):
     info_2 = SMt.get_tarifes_for_personal_crateing(language='ru')
     if info_1 and info_2 is not None:
         if ExcelAnketaRewriter.set_all_attributes(info_1, info_2):
-            print("END")
+            if SMt.send_link_excel_download(order_id):
+                print("EMAIL EXCEL")
+            raise Exception("EXCEL SENDING ERROR")
     raise Exception("EXCEL ERROR")
-
 
 
 
@@ -60,8 +61,12 @@ async def buy_tarife_by_transfer(personal_tarife: BuyTarifeByTransfer,
     state_of_buy = SMt.post_transfer_tarif(personal_tarife)
     if state_of_buy is not None:
         excel_creator_back.add_task(excel_creator, state_of_buy["order_id"])
+        #excel_creator_back.add_task(excel_sender, state_of_buy["order_id"] )
         return {"status": "ok"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
+
+
+#@tarif_app.get(APIRoutes.verifyorder)
 
 
 

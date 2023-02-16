@@ -17,6 +17,20 @@ class DatabaseManipulatorTARIFES:
                 return None
 
     @staticmethod
+    def get_email_for_excel(order_id):
+        """R"""
+        with DBConnection.create_cursor() as cursor:
+            try:
+                cursor.execute("SELECT c_email FROM company where "
+                               "c_id = (select company_id from saved_order_and_tarif where order_id=%(order_id)s)",
+                               {'order_id': order_id})
+                temp_ = cursor.fetchone()
+                return temp_
+            except Exception as e:
+                print(e)
+                return None
+
+    @staticmethod
     def post_personal_info_to_order(*,
                                     order_summ,
                                     cass_stantion_count,
@@ -91,7 +105,7 @@ class DatabaseManipulatorTARIFES:
                 union
                 select m_f_name,m_per_price from manager_field mf  where mf.m_f_id =1
                 union
-                select s_f_name,s_per_price from sklad_field sf  where sf .s_f_id =1
+                select w_m_f_name,w_m_per_price from web_manager_field sf  where sf .w_m_f_id =1
                 union
                 select m_c_f_name,m_c_per_price from mobile_cassa_field mcf  where mcf .m_c_f_id =1
                 ;""")
@@ -119,10 +133,12 @@ class DatabaseManipulatorTARIFES:
                        
                 from company cy
                 join saved_order_and_tarif soad on soad.company_id = cy.c_id
-                where c_id =(select company_id from saved_order_and_tarif where order_id = %(order_id)s);""",
+                where order_id = %(order_id)s
+                ;""",
                                {"order_id": order_id})
                 temp_ = cursor.fetchone()
                 return temp_
+            #(select company_id from saved_order_and_tarif where order_id = %(order_id)s)
             except Exception as e:
                 print(e)
                 return None

@@ -40,6 +40,7 @@ def end_api_background_tasks():
     #     SMa.TOKEN_THREAD2.cancel()
     DatabaseConnection.close()
 
+
 @main_app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     x = request.query_params

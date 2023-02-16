@@ -1,22 +1,7 @@
---drop function get_tarifes_for_view();
---drop type tarifes_table;
-
-CREATE OR REPLACE FUNCTION get_tarifes_for_view()
-RETURNS table(
-	   tarif_id int,
-	   tarif_names varchar(60)[],
-	   cassa_names varchar(60)[],
-	   tarif_month_prices int,
-	   cassa_counts int,
-	   manager_names varchar(60)[],
-	   manager_counts int,
-	   sklad_names varchar(60)[],
-	   sklad_counts int,
-	   mobile_cassa_names text[],
-	   mobile_cassa_counts int,
-	   tarifes_others text[])
-language plpgsql
-as $$
+CREATE OR REPLACE FUNCTION public.get_tarifes_for_view()
+ RETURNS TABLE(tarif_id integer, tarif_names character varying[], cassa_names character varying[], tarif_month_prices integer, cassa_counts integer, manager_names character varying[], manager_counts integer, web_names character varying[], web_counts integer, mobile_cassa_names text[], mobile_cassa_counts integer, tarifes_others text[])
+ LANGUAGE plpgsql
+AS $function$
 --declare 
 --tarifes_table_for_return tarifes_table;
 begin 
@@ -41,10 +26,11 @@ join cassa_field cf
 on tc.t_c_cassa_id = cf.c_f_id 
 join manager_field mf
 on tc.t_c_manager_id = mf.m_f_id 
-join sklad_field sf
-on tc.t_c_sklad_id = sf.s_f_id 
+join web_manager_field wmf
+on tc.t_c_web_id  = wmf.w_m_f_id 
 join mobile_cassa_field mcf
 on mcf.m_c_f_id  = tc.t_c_mobile_c_id  order by t_month_price limit 4;
 --return tarifes_table_for_return;
 end; 
-$$ 
+$function$
+;
