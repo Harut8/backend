@@ -53,7 +53,7 @@ async def add_process_time_header(request: Request, call_next):
 
 def start_server():
     """Start server"""
-    run(main_app, host='localhost')
+    run(main_app, host=host)
 
 
 #192.168.3.250

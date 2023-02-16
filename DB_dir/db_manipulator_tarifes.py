@@ -111,7 +111,12 @@ class DatabaseManipulatorTARIFES:
                        c_inn,
                        c_address,
                        order_summ, 
-                       soad.cass_stantion_count +soad.mobile_cass_count + soad.mobile_manager_count+ soad.web_manager_count as count
+                       soad.cass_stantion_count +soad.mobile_cass_count + soad.mobile_manager_count+ soad.web_manager_count as count,
+                       soad.cass_stantion_count as csc,
+                       soad.mobile_cass_count as mcc,
+                       soad.mobile_manager_count as mmc,
+                       soad.web_manager_count as wmc
+                       
                 from company cy
                 join saved_order_and_tarif soad on soad.company_id = cy.c_id
                 where c_id =(select company_id from saved_order_and_tarif where order_id = %(order_id)s);""",

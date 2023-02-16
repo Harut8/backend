@@ -78,3 +78,7 @@ class TarifModelForExcel(BaseModel):
     c_address: str
     order_summ: str
     count: int
+    csc: int
+    mcc: int
+    mmc: int
+    wmc: int

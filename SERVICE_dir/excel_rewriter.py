@@ -2,7 +2,7 @@ from num2words import num2words
 import dataclasses
 from openpyxl import load_workbook
 import datetime
-from MODELS_dir.tarif_model import TarifModelForExcel
+from MODELS_dir.tarif_model import TarifModelForExcel, PersonalTarifForView
 @dataclasses.dataclass
 class ExcelAnketaRewriter:
 
@@ -63,7 +63,7 @@ class ExcelAnketaRewriter:
             raise Exception(e)
 
     @classmethod
-    def rewrite_excel(cls, order_id):
+    def rewrite_excel(cls, order_id, tarif_info: TarifModelForExcel, personal_prices: PersonalTarifForView):
         try:
             # import os
             # print(os.getcwd())
@@ -79,6 +79,18 @@ class ExcelAnketaRewriter:
             sheet["B18"] = cls.tarife_summ
             sheet["C17"] = cls.buyed_tarifes_and_summ
             sheet["A20"] = cls.summ_with_words
+            sheet["D13"] = tarif_info.csc
+            sheet["D14"] = tarif_info.mcc
+            sheet["D15"] = tarif_info.wmc
+            sheet["D16"] = tarif_info.mmc
+            sheet["G13"] = personal_prices.cass_stantion_price or 0
+            sheet["G14"] = personal_prices.mobile_cass_price or 0
+            sheet["G15"] = personal_prices.web_manager_price or 0
+            sheet["G16"] = personal_prices.mobile_manager_price or 0
+            sheet["H13"] = (personal_prices.cass_stantion_price or 0)*tarif_info.csc
+            sheet["H14"] = (personal_prices.mobile_cass_price or 0)*tarif_info.mcc
+            sheet["H15"] = (personal_prices.web_manager_price or 0)*tarif_info.wmc
+            sheet["H16"] = (personal_prices.mobile_manager_price or 0)*tarif_info.mmc
             workbook.save(filename=f"SERVICE_dir/csv/{order_id}.xlsx")
             print("CREATED EXCEL")
             return True
@@ -87,12 +99,12 @@ class ExcelAnketaRewriter:
             return None
 
     @classmethod
-    def set_all_attributes(cls, info: TarifModelForExcel):
+    def set_all_attributes(cls, info: TarifModelForExcel, info2: PersonalTarifForView):
         try:
             cls.set_datetime()
             cls.set_buyer_info(info.c_name,info.c_inn,info.c_address)
             cls.set_order_info(info.order_id,info.count,info.order_summ)
-            cls.rewrite_excel(info.order_id)
+            cls.rewrite_excel(info.order_id, tarif_info=info, personal_prices=info2)
             return True
         except Exception as e:
             print(e)

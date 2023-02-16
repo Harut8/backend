@@ -114,7 +114,11 @@ class ServiceManipulatorTARIFES:
                     c_inn=info_['c_inn'],
                     c_address=info_['c_address'],
                     order_summ=info_['order_summ'],
-                    count=info_['count']
+                    count=info_['count'],
+                    csc=info_['csc'],
+                    mcc=info_['mcc'],
+                    mmc=info_['mmc'],
+                    wmc=info_['wmc'],
                 )
             return
         except Exception as e:

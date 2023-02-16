@@ -13,9 +13,10 @@ tarif_app = APIRouter(tags=["TARIF FUNCTIONALITY"])
 
 async def excel_creator(order_id):
     #avelcanel api exceli sarqelu hmar
-    info_ = SMt.get_info_for_excel(order_id)
-    if info_ is not None:
-        if ExcelAnketaRewriter.set_all_attributes(info_):
+    info_1 = SMt.get_info_for_excel(order_id)
+    info_2 = SMt.get_tarifes_for_personal_crateing(language='ru')
+    if info_1 and info_2 is not None:
+        if ExcelAnketaRewriter.set_all_attributes(info_1, info_2):
             print("END")
     raise Exception("EXCEL ERROR")
 
