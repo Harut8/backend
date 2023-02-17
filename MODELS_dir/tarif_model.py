@@ -51,7 +51,7 @@ class PersonalTarifInfo(BaseModel):
     mobile_cass_count: int | None = None
     mobile_manager_count: int | None = None
     web_manager_count: int | None = None
-    tarif_month: int | None = None
+    tarif_month: int | None = 1
 
 
 class PersonalTarifForView(PersonalTarifForClient):
