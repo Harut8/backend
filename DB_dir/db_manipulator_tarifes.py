@@ -37,7 +37,7 @@ class DatabaseManipulatorTARIFES:
                                     mobile_cass_count,
                                     mobile_manager_count,
                                     web_manager_count,
-                                    company_id,
+                                    client_token,
                                     interval
                                     ):
         """Returns a dict of tarifes information"""
@@ -50,7 +50,7 @@ class DatabaseManipulatorTARIFES:
                     declare 
                     inn_info int;
                     begin
-                    SELECT c_inn into inn_info from company where c_id = %(company_id)s;
+                    SELECT c_inn into inn_info from company where c_token = %(client_token)s;
                     if inn_info is null then 
                         raise Exception 'error' ;
                     end if;
@@ -58,8 +58,10 @@ class DatabaseManipulatorTARIFES:
                     $do$
                     """
                 ,{
-                    "company_id": company_id
+                    "client_token": client_token
                     })
+                cursor.execute("""select c_id from company where c_token = %(client_token)s""",{"client_token":client_token})
+                company_id = cursor.fetchone()["c_id"]
                 cursor.execute("""
                 INSERT INTO saved_order_and_tarif(
                                order_summ,

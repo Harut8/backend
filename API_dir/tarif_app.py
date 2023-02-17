@@ -1,3 +1,4 @@
+import jose.jwe
 from fastapi import HTTPException, status, Depends, APIRouter, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .account_app import get_current_user
@@ -5,7 +6,7 @@ from .api_routes import APIRoutes
 from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient, PersonalTarifInfo, BuyTarifeByTransfer)
 from SERVICE_dir.service_manipulator_tarifes import ServiceManipulatorTARIFES as SMt
 from SERVICE_dir.excel_rewriter import ExcelAnketaRewriter
-
+from SERVICE_dir.jwt_logic import JWTParamas
 """-------------START OF TARIFES API-s-----------------"""
 
 tarif_app = APIRouter(tags=["TARIF FUNCTIONALITY"])
@@ -58,6 +59,8 @@ async def get_tarifes_all_summ(personal_tarife: PersonalTarifInfo,
 async def buy_tarife_by_transfer(personal_tarife: BuyTarifeByTransfer,
                            excel_creator_back: BackgroundTasks,
                            access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+    #personal_tarife.company_id = jose.jwe.decrypt(access_token, JWTParamas.ACCESS_SECRET_KEY)
+    personal_tarife.client_token = access_token
     state_of_buy = SMt.post_transfer_tarif(personal_tarife)
     if state_of_buy is not None:
         excel_creator_back.add_task(excel_creator, state_of_buy["order_id"])

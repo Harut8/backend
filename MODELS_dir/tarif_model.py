@@ -67,7 +67,7 @@ class BuyTarifeByTransfer(BaseModel):
     mobile_cass_count: int
     mobile_manager_count: int
     web_manager_count: int
-    company_id: int
+    client_token: str
     interval: int = 1
 
 

@@ -48,13 +48,14 @@ class ServiceManipulatorTARIFES:
     def post_transfer_tarif(
             item: BuyTarifeByTransfer):
         try:
+
             temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_order(
                 order_summ=item.order_summ,
                 cass_stantion_count=item.cass_stantion_count,
                 mobile_cass_count=item.mobile_cass_count,
                 mobile_manager_count=item.mobile_manager_count,
                 web_manager_count=item.web_manager_count,
-                company_id=item.company_id,
+                client_token=item.client_token,
                 interval=item.interval
             )
             if temp_:
