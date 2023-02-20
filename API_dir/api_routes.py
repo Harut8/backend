@@ -15,3 +15,5 @@ class APIRoutes:
     getallsumm = '/getallsumm'
     buybytransfer = '/buybytransfer'
     verifyorder = '/verifyorder/'
+
+    ispayed = '/ispayed'
