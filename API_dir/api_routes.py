@@ -17,3 +17,4 @@ class APIRoutes:
     verifyorder = '/verifyorder/'
 
     ispayed = '/ispayed'
+    getpaymentlist = '/getpaymentlist/{type_of_payment}'

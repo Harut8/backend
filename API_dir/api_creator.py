@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 
 from .account_app import account_app
 from .tarif_app import tarif_app
+from .admin_app import admin_app
 from uvicorn import run
 from fastapi.middleware.cors import CORSMiddleware
 from configparser import ConfigParser
@@ -16,7 +17,7 @@ host = conf.get('API', 'host')
 main_app = FastAPI()
 main_app.include_router(account_app)
 main_app.include_router(tarif_app)
-
+main_app.include_router(admin_app)
 origins = ["*"]
 
 main_app.add_middleware(
