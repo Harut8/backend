@@ -40,3 +40,15 @@ class DatabaseManipulatorADMIN:
             print(e)
             return
 
+    @staticmethod
+    def get_email_for_link(order_id):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("select c_email from company where c_id = "
+                               "(SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)",
+                               {"order_id": int(order_id)})
+                return cursor.fetchone()
+        except Exception as e:
+            print(e)
+            return
+

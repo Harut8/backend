@@ -12,6 +12,14 @@ class ServiceManipulatorADMIN:
             return True
         return None
 
+    @staticmethod
+    def send_email_for_order_verify(order_id_token: str):
+        order_id = decode_client_id_for_verify(order_id_token)
+        info_ = DatabaseManipulatorADMIN.get_email_for_link(order_id)
+        if info_ is not None:
+            return info_['c_email']
+        return
+
     @classmethod
     def __create_list_of_payment(cls, info_):
         return [

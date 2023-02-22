@@ -9,15 +9,6 @@ from email.utils import formatdate
 from email import encoders
 
 
-def generate_url_for_excel(*, order_id_token: str):
-    """ GENERATE URL FOR VERIFYING ACCOUNT"""
-    from API_dir.api_creator import host
-    url = 'http://'+host+':8000/verifyorder/?'
-    params = {'order_token': order_id_token, 'data': 'JbbfghGVEVGEJKIJCVBEJGHEBEKKEHBHNKVIRH'}
-    return url + urllib.parse.urlencode(params)
-
-
-
 def send_mail(send_to,order_id,subject='DOWNLOAD EXCEL',text='DOWNLOAD EXCEL',isTls=True):
     try:
         print(os.getcwd())

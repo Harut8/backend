@@ -14,7 +14,7 @@ class APIRoutes:
     get_personal_info_route = '/getpersonal/'
     getallsumm = '/getallsumm'
     buybytransfer = '/buybytransfer'
-    verifyorder = '/verifyorder/'
 
+    verifyorder = '/verifyorder/'
     verifypayment = '/verifypayment'
     getpaymentlist = '/getpaymentlist/{type_of_payment}'

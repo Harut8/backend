@@ -1,8 +1,10 @@
 --select date_part('day', k.sb)  from (select order_ending -order_date as sb  from saved_order_and_tarif soat) as k
-DO
+create function verify_payment(order_id_ int)
+returns void
+language plpgsql
+as
 $func$
 declare 
-order_id_ int:=70;
 state_checker bool;
 count_row record;
 t_c_id_ int;
