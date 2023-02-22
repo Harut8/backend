@@ -5,7 +5,7 @@ from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
 admin_app = APIRouter(tags=["ADMIN PANEL FUNCTIONAL"])
 
 
-@admin_app.post(APIRoutes.ispayed)
+@admin_app.post(APIRoutes.verifypayment)
 async def admin_verify_payment(client_token: str):
     if ServiceManipulatorADMIN.verify_payment_of_client(client_token):
         return {"status": "ok", "message": "payment is authorized"}

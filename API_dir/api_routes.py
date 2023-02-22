@@ -16,5 +16,5 @@ class APIRoutes:
     buybytransfer = '/buybytransfer'
     verifyorder = '/verifyorder/'
 
-    ispayed = '/ispayed'
+    verifypayment = '/verifypayment'
     getpaymentlist = '/getpaymentlist/{type_of_payment}'
