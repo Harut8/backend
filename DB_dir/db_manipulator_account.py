@@ -239,17 +239,46 @@ class DatabaseManipulatorACCOUNT:
             return
 
     @staticmethod
-    def signin_acc_info(*, acc_token: str):
+    def signin_acc_info(*, acc_token: str, lan_num: int):
         """ 3 WAYS TO GET INFO BY TOKEN
             company_email and company_password
             company_email and diller_password
             diller_email and diller_password"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = """SELECT c_id, c_name, c_contact_name, c_phone, c_email FROM company
-                                    WHERE c_token = %(acc_token)s"""
+                SQL_query = """SELECT c_id,
+                                      c_name,
+                                      c_contact_name,
+                                      c_phone,
+                                      c_email
+                               FROM company
+                               WHERE c_token = %(acc_token)s"""
                 cursor.execute(SQL_query, {'acc_token': acc_token})
                 data = cursor.fetchone()
+                cursor.execute("""
+                SELECT 
+                      distinct t_id,
+                      t_name[%(lan_num)s],
+                      end_license::date,
+                      true as order_state
+                FROM tarif 
+                join client_tarif ct on ct.c_t_id = %(client_id)s and ct.c_t_tarif_id  = t_id
+                where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s)
+                union all
+                SELECT 
+                      distinct t_id,
+                      t_name[%(lan_num)s],
+                      null::date,
+                      false as order_state
+                FROM tarif 
+                where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s
+                except select c_t_tarif_id  from client_tarif ct2  where c_t_id  = %(client_id)s)
+                               """,
+                               {"client_id": data['c_id'],
+                                "lan_num": lan_num})
+
+                data2 = cursor.fetchall()
+                data = data | {"tarif_list": data2}
                 if data is None:
                     SQL_query = """SELECT c_name, d_name FROM company c
                          LEFT JOIN diller d ON c.c_diller_id = d.d_id

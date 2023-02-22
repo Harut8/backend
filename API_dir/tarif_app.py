@@ -3,7 +3,8 @@ from fastapi import HTTPException, status, Depends, APIRouter, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .account_app import get_current_user
 from .api_routes import APIRoutes
-from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient, PersonalTarifInfo, BuyTarifeByTransfer)
+from MODELS_dir.acc_model import Language
+from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient, PersonalTarifInfo, BuyTarifeByTransfer, TarifDetailsGet)
 from SERVICE_dir.service_manipulator_tarifes import ServiceManipulatorTARIFES as SMt
 from SERVICE_dir.excel_rewriter import ExcelAnketaRewriter
 from SERVICE_dir.jwt_logic import JWTParamas
@@ -27,22 +28,20 @@ def excel_creator(order_id):
 
 #access_token: OAuth2PasswordBearer = Depends(get_current_user)
 @tarif_app.get(APIRoutes.get_tarifes_for_view_route+'{language}')
-async def get_tarifes_for_view_route(language):
+async def get_tarifes_for_view_route(language: Language):
     """ GET ALL POSSIBLE TARIFES FOR VIEW """
-    if language in ('ru', 'hy', 'en'):
-        temp_ = SMt.get_tarifes_for_view(language=language)
-        if temp_ is not None:
-            return temp_
+    temp_ = SMt.get_tarifes_for_view(language=language.value)
+    if temp_ is not None:
+        return temp_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'TARIF VIEW ERROR'})
 
 
 @tarif_app.get(APIRoutes.get_personal_info_route+'{language}')
-async def get_tarifes_for_view_route(language: str):
+async def get_tarifes_for_view_route(language: Language):
     """ GET INFO FOR TARIFES FOR PERSONAL CREATEING """
-    if language.lower() in ('ru', 'hy', 'en'):
-        temp_ = SMt.get_tarifes_for_personal_crateing(language)
-        if temp_ is not None:
-            return temp_
+    temp_ = SMt.get_tarifes_for_personal_crateing(language.value)
+    if temp_ is not None:
+        return temp_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'TARIF VIEW ERROR'})
 
 
@@ -69,7 +68,14 @@ async def buy_tarife_by_transfer(personal_tarife: BuyTarifeByTransfer,
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
 
-#@tarif_app.get(APIRoutes.verifyorder)
+@tarif_app.post(APIRoutes.acc_get_tarif_details)
+async def get_tarif_details(tarif_id_body: TarifDetailsGet,
+                            access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+    print(tarif_id_body)
+    info_ = SMt.get_tarif_details(tarif_id_body.tarif_id)
+    if info_ is not None:
+        return info_
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'DETAIL ERROR'})
 
 
 

@@ -3,6 +3,8 @@ from fastapi import APIRouter, BackgroundTasks
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
+
+from MODELS_dir.acc_model import Language
 from SERVICE_dir.jwt_logic import JWTParamas, create_access_token, create_refresh_token, TokenPayload
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AccountModel
@@ -197,9 +199,9 @@ def check_and_send_new_token(
 
 
 @account_app.get(APIRoutes.acc_login_route)
-async def signin_acc_info(access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+async def signin_acc_info(language: Language, access_token: OAuth2PasswordBearer = Depends(get_current_user)):
     """GET ACCOUNT INFO WITH TOKENS"""
-    check_ = SMa.signin_acc_info(acc_token=access_token)
+    check_ = SMa.signin_acc_info(acc_token=access_token, lan=language.value)
     if check_ is not None:
         return check_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})

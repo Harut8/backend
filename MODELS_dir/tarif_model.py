@@ -61,6 +61,10 @@ class PersonalTarifForView(PersonalTarifForClient):
     web_manager_name: str | None = None
 
 
+class TarifDetailsGet(BaseModel):
+    tarif_id: int = None
+
+
 class BuyTarifeByTransfer(BaseModel):
     order_summ: int
     cass_stantion_count: int

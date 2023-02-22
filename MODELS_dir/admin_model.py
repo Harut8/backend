@@ -24,7 +24,7 @@ class PaymentListView(BaseModel):
     @validator('order_date', 'order_ending')
     def order_date_checker(cls, arg: datetime, **kwargs):
         try:
-            return arg.strftime('%d/%m/%Y')
+            return arg.strftime('%Y-%m-%d')
         except Exception:
             raise Exception('ERROR')
 

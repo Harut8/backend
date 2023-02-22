@@ -1,3 +1,7 @@
+from enum import Enum
+from datetime import datetime
+from typing import Any
+
 from pydantic import BaseModel
 from pydantic import Field, validator, ValidationError, validate_email
 import email_validator
@@ -104,3 +108,25 @@ class AccountSignModel(BaseModel):
     """ MODEL FOR ACCOUNT SIGNIN """
     username: str
     password: str
+
+
+class AccountViewInnerModel(BaseModel):
+    t_id: int
+    t_name: str | None
+    end_license: Any
+    order_state: bool
+
+
+class AccountViewModel(BaseModel):
+    c_id: int
+    c_name: str
+    c_contact_name: str
+    c_phone: str
+    c_email: str
+    tarif_list: list[AccountViewInnerModel]
+
+
+class Language(Enum):
+    ru = 'ru'
+    en = 'en'
+    hy = 'hy'

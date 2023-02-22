@@ -15,7 +15,6 @@ language_dict = {
             "ru": 0,
             "en": 1,
             "hy": 2
-
         }
 
 
@@ -42,6 +41,13 @@ class ServiceManipulatorTARIFES:
             if send_mail(info_["c_email"], order_id):
                 print("success")
                 return True
+        return
+
+    @staticmethod
+    def get_tarif_details(tarif_id):
+        info_ = DatabaseManipulatorTARIFES.get_tarif_details(tarif_id)
+        if info_ is not None:
+            return info_
         return
 
     @staticmethod

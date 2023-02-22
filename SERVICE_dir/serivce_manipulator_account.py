@@ -3,7 +3,7 @@ import redis
 import asyncio
 from DB_dir.db_manipulator_account import DatabaseManipulatorACCOUNT as DBManipulator
 from MODELS_dir.acc_model import AccountRegModel
-from MODELS_dir.acc_model import AccountSignModel
+from MODELS_dir.acc_model import AccountSignModel, AccountViewModel, AccountViewInnerModel
 from SERVICE_dir import verify_email_sender as ves
 from SERVICE_dir import send_recovery_code as src
 from SERVICE_dir import send_unique_id as sui
@@ -17,6 +17,11 @@ class ServiceManipulatorACCOUNT:
     TOKEN_THREAD1 = None
     TOKEN_THREAD2 = None
     redis_client = redis.Redis(host='127.0.0.1', port=6379)
+    language_dict = {
+        "ru": 0,
+        "en": 1,
+        "hy": 2
+    }
 
     @staticmethod
     def call_async_function(acc_email, generated_link,):
@@ -129,10 +134,18 @@ class ServiceManipulatorACCOUNT:
             return
 
     @staticmethod
-    def signin_acc_info(*, acc_token: str):
-        tmp_ = DBManipulator.signin_acc_info(acc_token=acc_token)
+    def signin_acc_info(*, acc_token: str, lan: str):
+        tmp_ = DBManipulator.signin_acc_info(acc_token=acc_token, lan_num=ServiceManipulatorACCOUNT.language_dict[lan]+1)
         if tmp_ is not None:
-            return tmp_
+            print(tmp_)
+            return AccountViewModel(
+                c_id=tmp_["c_id"],
+                c_name=tmp_["c_name"],
+                c_contact_name=tmp_["c_contact_name"],
+                c_phone=tmp_["c_phone"],
+                c_email=tmp_["c_email"],
+                tarif_list=tmp_["tarif_list"],
+            )
         return
 
     @staticmethod

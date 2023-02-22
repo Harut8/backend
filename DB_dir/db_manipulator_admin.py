@@ -33,7 +33,13 @@ class DatabaseManipulatorADMIN:
     def verify_payment_of_client(order_id):
         try:
             with DBConnection.create_cursor() as cursor:
-                cursor.execute("SELECT verify_payment(%(order_id)s)", {"order_id": int(order_id)})
+                cursor.execute("""update saved_order_and_tarif set order_state = true where order_id = %(order_id_)s;
+                INSERT INTO client_tarif(c_t_id, c_t_tarif_id, end_license)
+                select company_id,
+                tarif_id_fk,
+                current_timestamp+
+                concat(date_part('day',(select order_ending -order_date from saved_order_and_tarif where order_id=%(order_id_)s)), ' days')::interval
+                from saved_order_and_tarif where order_id=%(order_id_)s""", {"order_id_": int(order_id)})
                 DBConnection.commit()
                 return True
         except Exception as e:

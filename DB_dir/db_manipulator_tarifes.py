@@ -17,6 +17,17 @@ class DatabaseManipulatorTARIFES:
                 return None
 
     @staticmethod
+    def get_tarif_details(tarif_id):
+        with DBConnection.create_cursor() as cursor:
+            try:
+                cursor.execute(""" select * from get_tarif_details(%(tarif_id)s)""", {"tarif_id": tarif_id})
+                temp_ = cursor.fetchone()
+                print(temp_)
+                return temp_
+            except Exception as e:
+                print(e)
+                return
+    @staticmethod
     def get_email_for_excel(order_id):
         """R"""
         with DBConnection.create_cursor() as cursor:
@@ -91,6 +102,7 @@ class DatabaseManipulatorTARIFES:
                                    "interval": interval
                                })
                 info = cursor.fetchone()
+                cursor.execute("SELECT verify_payment(%(order_id)s)", {"order_id": info["order_id"]})
                 DBConnection.commit()
                 return info
             except Exception as e:

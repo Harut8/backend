@@ -9,6 +9,7 @@ class ServiceManipulatorADMIN:
     def verify_payment_of_client(order_id_token: str):
         order_id = decode_client_id_for_verify(order_id_token)
         if DatabaseManipulatorADMIN.verify_payment_of_client(order_id):
+            print('ok')
             return True
         return None
 
