@@ -12,7 +12,7 @@ from SERVICE_dir.jwt_logic import JWTParamas
 tarif_app = APIRouter(tags=["TARIF FUNCTIONALITY"])
 
 
-async def excel_creator(order_id):
+def excel_creator(order_id):
     #avelcanel api exceli sarqelu hmar
     info_1 = SMt.get_info_for_excel(order_id)
     info_2 = SMt.get_tarifes_for_personal_crateing(language='ru')
