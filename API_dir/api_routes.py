@@ -10,6 +10,7 @@ class APIRoutes:
     acc_refresh_token = '/refreshtoken/'
     acc_get_tarif_details = '/tarifdetails'
 
+
     get_tarifes_for_view_route = '/gettarifesforview/'
     post_tarife_to_client = '/buytariftoclient/'
     get_personal_info_route = '/getpersonal/'
@@ -20,3 +21,8 @@ class APIRoutes:
     verifyorder = '/verifyorder/'
     verifypayment = '/verifypayment'
     getpaymentlist = '/getpaymentlist/{type_of_payment}'
+
+
+    addlicense = '/addlicense'
+    checklicense = '/checklicense'
+

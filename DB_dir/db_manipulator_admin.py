@@ -58,3 +58,47 @@ class DatabaseManipulatorADMIN:
             print(e)
             return
 
+    @staticmethod
+    def get_links(order_id):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""
+                 select product_link  from links l 
+                 where product_id in (
+                 select
+                 case
+                 when cass_stantion_count <> 0 then 1
+                 else Null
+                 end from saved_order_and_tarif soat 
+                 where order_id = %(order_id)s
+                 union
+                 select 
+                 case
+                 when mobile_cass_count <> 0 then 2
+                 else Null
+                 end from saved_order_and_tarif soat 
+                 where order_id = %(order_id)s
+                 union 
+                 select 
+                 case
+                 when web_manager_count <> 0 then 3
+                 else Null
+                 end from saved_order_and_tarif soat 
+                 where order_id = %(order_id)s
+                 union 
+                 select 
+                 case
+                 when mobile_manager_count <> 0 then 4
+                 else Null
+                 end 
+                 from saved_order_and_tarif soat 
+                 where order_id = %(order_id)s)""",
+                               {"order_id": int(order_id)})
+                return cursor.fetchone()
+        except Exception as e:
+            print(e)
+            return
+
+
+
+
