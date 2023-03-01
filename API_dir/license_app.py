@@ -17,4 +17,8 @@ async def add_license(add_info: AddLicenseModel):
 
 @license_app.post(APIRoutes.checklicense)
 async def check_license(check_info: CheckLicenseModel):
-    ...
+    """if true then license is active"""
+    info_ = ServiceManipulatorLICENSE.check_license(check_info)
+    if info_ is not None:
+        return {'status': info_}
+    raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'LICENSE TIME ERROR'})

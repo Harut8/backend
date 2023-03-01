@@ -74,3 +74,47 @@ where
             DBConnection.rollback()
             print(e)
             return
+
+    @staticmethod
+    def check_license(check_info: CheckLicenseModel):
+        try:
+            product_id_table = {
+                1: 'cass_stantion_count',
+                2: 'mobile_cass_count',
+                3: 'web_manager_count',
+                4: 'mobile_manager_count'
+            }
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute(""" 
+                select c_t_tarif_id as tarif_id, end_license::date<>current_date as date_state  from client_tarif ct where c_t_id = 
+                (select c_id
+                from company c where c_unique_id =( select unique_id_cp  from licenses l
+                where license_key = %(lc_key)s
+                and %(dev_code)s = (select device_code from device_info di 
+                where device_license_key = %(lc_key)s)))""", {
+                    'lc_key': check_info.license_key,
+                    'dev_code': check_info.device_code
+                })
+                tarif_id_and_date = cursor.fetchall()
+                cursor.execute(f"""
+                select tarif_id_fk as tarif_id,
+                case 
+                    when {product_id_table[check_info.product_id]} > 0 then true
+                    else false
+                end as state
+                from saved_order_and_tarif soat where company_id = (
+                select c_id from company c where c_unique_id =(
+                select unique_id_cp  from licenses l where license_key = %(lc_key)s
+                and %(dev_code)s = (select device_code from device_info di 
+                where device_license_key = %(lc_key)s))) and order_state = true""",{
+                    'lc_key': check_info.license_key,
+                    'dev_code': check_info.device_code
+                })
+                tarif_id_and_count_of_product = cursor.fetchall()
+                info_of_id = [i['tarif_id'] for i in tarif_id_and_date if i['date_state'] is True]
+                info_of_count = any([True for j in tarif_id_and_count_of_product if j['state'] is True and j['tarif_id'] in info_of_id])
+                return info_of_count
+
+        except Exception as e:
+            print(e)
+            return

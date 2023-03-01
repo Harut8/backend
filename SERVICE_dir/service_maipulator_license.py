@@ -10,3 +10,10 @@ class ServiceManipulatorLICENSE:
         if info_ is not None:
             return info_
         return
+
+    @staticmethod
+    def check_license(check_model: CheckLicenseModel):
+        info_ = DatabaseManipulatorLICENSE.check_license(check_model)
+        if info_ is not None:
+            return info_
+        return
