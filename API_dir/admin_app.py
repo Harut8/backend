@@ -19,7 +19,7 @@ def send_verify_link_to_client(client_email, client_token):
 @admin_app.get(APIRoutes.verifypayment)
 async def client_verify_payment_link(client_token: str, send_link: BackgroundTasks):
     if ServiceManipulatorADMIN.verify_payment_of_client(client_token):
-        send_link.add_task()
+        #send_link.add_task()
         return RedirectResponse('http://pcassa.ru/')
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'SET PAYMENT ERROR'})
 
