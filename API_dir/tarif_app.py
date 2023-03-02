@@ -1,7 +1,11 @@
 import jose.jwe
 from fastapi import HTTPException, status, Depends, APIRouter, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+from SERVICE_dir.admin_client_secure import encode_client_id_for_url
+from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
 from .account_app import get_current_user
+from .admin_app import send_verify_link_to_client
 from .api_routes import APIRoutes
 from MODELS_dir.acc_model import Language
 from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient, PersonalTarifInfo, BuyTarifeByTransfer, TarifDetailsGet)
@@ -60,10 +64,28 @@ async def buy_tarife_by_transfer(personal_tarife: BuyTarifeByTransfer,
                            access_token: OAuth2PasswordBearer = Depends(get_current_user)):
     #personal_tarife.company_id = jose.jwe.decrypt(access_token, JWTParamas.ACCESS_SECRET_KEY)
     personal_tarife.client_token = access_token
-    state_of_buy = SMt.post_transfer_tarif(personal_tarife)
+    state_of_buy = SMt.post_transfer_tarif(personal_tarife, valute=0)
     if state_of_buy is not None:
         excel_creator_back.add_task(excel_creator, state_of_buy["order_id"])
         #excel_creator_back.add_task(excel_sender, state_of_buy["order_id"] )
+        return {"status": "ok"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
+
+
+@tarif_app.post(APIRoutes.buybycard)
+async def buy_tarife_by_card(
+        personal_tarife: BuyTarifeByTransfer,
+        back_task: BackgroundTasks,
+        access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+    #if bank works okay
+    personal_tarife.client_token = access_token
+    state_of_buy = SMt.post_transfer_tarif(personal_tarife, valute=1)
+    if state_of_buy is not None:
+        client_token = encode_client_id_for_url(state_of_buy["order_id"])
+        info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
+        if info_:
+            back_task.add_task(send_verify_link_to_client, info_, client_token)
+            return {"status": "ok", "message": "VERIFY LINK SENDED"}
         return {"status": "ok"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
@@ -78,14 +100,14 @@ async def get_tarif_details(tarif_id_body: TarifDetailsGet,
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'DETAIL ERROR'})
 
 
-
-
-# @tarif_app.post(APIRoutes.post_tarife_to_client)
-# def post_tarife_to_client(tarif_for_client: TarifToClient, access_token: OAuth2PasswordBearer = Depends(get_current_user)):
-#     """ POST TARIFE FOR CLIENT """
-#     if SMt.post_tarif_to_company(tarif=tarif_for_client, client_token=access_token):
-#         return {"status": "TARIF ADDED TO CLIENT"}
-#     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'TARIF ADD ERROR'})
+@tarif_app.post(APIRoutes.changetocard)
+async def change_valute_to_card(
+        tarif_id_model: TarifDetailsGet,
+        access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+    #if bank works okay
+    if SMt.change_valute_to_card(tarif_id_model.tarif_id):
+        return {"status": "ok"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'CHANGING ERROR'})
 
 
 """-------------END OF TARIFES API-s-----------------"""

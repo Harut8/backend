@@ -17,6 +17,21 @@ class DatabaseManipulatorTARIFES:
                 return None
 
     @staticmethod
+    def change_valute_to_card(tarif_id):
+        with DBConnection.create_cursor() as cursor:
+            try:
+                cursor.execute("""
+                UPDATE saved_order_and_tarif SET order_state = TRUE, order_curr_type = 1 
+                WHERE tarif_id_fk = %(tarif_id)s;
+                """, {
+                    'tarif_id_fk': tarif_id
+                })
+                DBConnection.commit()
+                return True
+            except Exception as e:
+                return
+
+    @staticmethod
     def get_tarif_details(tarif_id):
         with DBConnection.create_cursor() as cursor:
             try:
@@ -49,7 +64,8 @@ class DatabaseManipulatorTARIFES:
                                     mobile_manager_count,
                                     web_manager_count,
                                     client_token,
-                                    interval
+                                    interval,
+                                    valute
                                     ):
         """Returns a dict of tarifes information"""
         with DBConnection.create_cursor() as cursor:
@@ -81,7 +97,8 @@ class DatabaseManipulatorTARIFES:
                                mobile_manager_count,
                                web_manager_count,
                                company_id,
-                               order_ending
+                               order_ending,
+                               order_curr_type
                                ) VALUES(
                                %(order_summ)s,
                                %(cass_stantion_count)s,
@@ -89,7 +106,8 @@ class DatabaseManipulatorTARIFES:
                                %(mobile_manager_count)s,
                                %(web_manager_count)s,
                                %(company_id)s,
-                               current_timestamp + interval '%(interval)s month'
+                               current_timestamp + interval '%(interval)s month',
+                               %(valute)s
                                ) RETURNING order_id"""
                                ,
                                {
@@ -99,7 +117,8 @@ class DatabaseManipulatorTARIFES:
                                    "mobile_manager_count": mobile_manager_count,
                                    "web_manager_count": web_manager_count,
                                    "company_id": company_id,
-                                   "interval": interval
+                                   "interval": interval,
+                                   "valute": valute
                                })
                 info = cursor.fetchone()
                 cursor.execute("SELECT verify_payment(%(order_id)s)", {"order_id": info["order_id"]})

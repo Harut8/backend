@@ -51,8 +51,15 @@ class ServiceManipulatorTARIFES:
         return
 
     @staticmethod
+    def change_valute_to_card(tarif_id):
+        if DatabaseManipulatorTARIFES.change_valute_to_card(tarif_id):
+            return True
+        return
+
+    @staticmethod
     def post_transfer_tarif(
-            item: BuyTarifeByTransfer):
+            item: BuyTarifeByTransfer,
+            valute: int):
         try:
 
             temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_order(
@@ -62,7 +69,8 @@ class ServiceManipulatorTARIFES:
                 mobile_manager_count=item.mobile_manager_count,
                 web_manager_count=item.web_manager_count,
                 client_token=item.client_token,
-                interval=item.interval
+                interval=item.interval,
+                valute=valute
             )
             if temp_:
                 return temp_

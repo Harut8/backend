@@ -32,7 +32,7 @@ def send_order_verify_link_email(*, receiver_email: str, message: str):
           <head></head>
           <body>
                 <h2 color='red'> PCASSA </h2>
-                <p> AFTER CLICKING TO THIS LINK YOUR ACCOUNT BE VERIFIED</p>
+                <p> AFTER CLICKING TO THIS LINK YOUR TARIF BE VERIFIED</p>
                {link_for_verify}
           </body>
         </html>
