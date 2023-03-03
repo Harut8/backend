@@ -8,6 +8,7 @@ from SERVICE_dir import verify_email_sender as ves
 from SERVICE_dir import send_recovery_code as src
 from SERVICE_dir import send_unique_id as sui
 from SERVICE_dir import jwt_logic
+from SERVICE_dir.admin_client_secure import decode_client_id_for_verify
 
 
 class ServiceManipulatorACCOUNT:

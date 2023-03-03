@@ -29,7 +29,6 @@ def excel_creator(order_id):
     raise Exception("EXCEL ERROR")
 
 
-
 #access_token: OAuth2PasswordBearer = Depends(get_current_user)
 @tarif_app.get(APIRoutes.get_tarifes_for_view_route+'{language}')
 async def get_tarifes_for_view_route(language: Language):

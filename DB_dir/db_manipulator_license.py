@@ -69,7 +69,7 @@ where
                 })
                 port_ = cursor.fetchone()
                 DBConnection.commit()
-                return port_ | {'ip': '192.168.0.206', 'license_key': license_key_}
+                return {'port': 3456} | {'ip': '192.168.3.206', 'license_key': license_key_}
         except Exception as e:
             DBConnection.rollback()
             print(e)

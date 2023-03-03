@@ -5,10 +5,13 @@ from MODELS_dir.admin_model import PaymentListEnum
 from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
 admin_app = APIRouter(tags=["ADMIN PANEL FUNCTIONAL"])
 from SERVICE_dir.order_verify_email_sender import send_order_verify_link_email, generate_url_for_verify_tarif
+from SERVICE_dir.links_for_download_send import send_download_links
 
 
-def send_link_for_download(order_id):
-    ...
+def send_link_for_download(order_id_token):
+    print('mtav')
+    info_ = ServiceManipulatorADMIN.links_for_downloading(order_id_token)
+    send_download_links(receiver_email='har.avetisyan2002@gmail.com', message= info_)
 
 
 def send_verify_link_to_client(client_email, client_token):
@@ -18,8 +21,9 @@ def send_verify_link_to_client(client_email, client_token):
 
 @admin_app.get(APIRoutes.verifypayment)
 async def client_verify_payment_link(client_token: str, send_link: BackgroundTasks):
+    #send_link.add_task(send_link_for_download, client_token)
     if ServiceManipulatorADMIN.verify_payment_of_client(client_token):
-        #send_link.add_task()
+        send_link.add_task(send_link_for_download, client_token)
         return RedirectResponse('http://pcassa.ru/')
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'SET PAYMENT ERROR'})
 

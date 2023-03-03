@@ -14,8 +14,12 @@ class ServiceManipulatorADMIN:
         return None
 
     @staticmethod
-    def get_linkes_will_sended(order_id_token: str):
+    def links_for_downloading(order_id_token):
         order_id = decode_client_id_for_verify(order_id_token)
+        info_ = DatabaseManipulatorADMIN.get_links_for_sending(order_id)
+        if info_ is not None:
+            return info_
+        return
 
     @staticmethod
     def send_email_for_order_verify(order_id_token: str):

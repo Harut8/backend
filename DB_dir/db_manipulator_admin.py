@@ -30,6 +30,21 @@ class DatabaseManipulatorADMIN:
             return
 
     @staticmethod
+    def get_links_for_sending(order_id):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute(""" 
+                SELECT * from get_links_state(%(order_id)s);
+                """, {'order_id': order_id})
+                info_ = cursor.fetchone()
+                if info_ is not None:
+                    return [j for j in info_.values()]
+                return
+        except Exception as e:
+            print(e)
+            return
+
+    @staticmethod
     def verify_payment_of_client(order_id):
         try:
             with DBConnection.create_cursor() as cursor:
@@ -98,7 +113,6 @@ class DatabaseManipulatorADMIN:
         except Exception as e:
             print(e)
             return
-
 
 
 
