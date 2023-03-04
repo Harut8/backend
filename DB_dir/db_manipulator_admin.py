@@ -48,13 +48,29 @@ class DatabaseManipulatorADMIN:
     def verify_payment_of_client(order_id):
         try:
             with DBConnection.create_cursor() as cursor:
-                cursor.execute("""update saved_order_and_tarif set order_state = true where order_id = %(order_id_)s;
+                cursor.execute("""
+                do
+                $$
+begin
+	if (select order_state from saved_order_and_tarif soat  where order_id = %(order_id_)s) = true 
+	then
+	update client_tarif set start_license = current_timestamp, end_license = 
+                current_timestamp+
+                concat(date_part('day',(select order_ending -order_date from saved_order_and_tarif where order_id=%(order_id_)s)), ' days')::interval
+                where c_t_tarif_id = (select tarif_id_fk from saved_order_and_tarif where order_id = %(order_id_)s);
+	else
+	update saved_order_and_tarif set order_state = true where order_id = %(order_id_)s;
                 INSERT INTO client_tarif(c_t_id, c_t_tarif_id, end_license)
                 select company_id,
                 tarif_id_fk,
                 current_timestamp+
                 concat(date_part('day',(select order_ending -order_date from saved_order_and_tarif where order_id=%(order_id_)s)), ' days')::interval
-                from saved_order_and_tarif where order_id=%(order_id_)s""", {"order_id_": int(order_id)})
+                from saved_order_and_tarif where order_id=%(order_id_)s;
+end if;
+end;
+$$
+
+                """, {"order_id_": int(order_id)})
                 DBConnection.commit()
                 return True
         except Exception as e:

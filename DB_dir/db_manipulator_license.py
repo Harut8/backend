@@ -69,7 +69,7 @@ where
                 })
                 port_ = cursor.fetchone()
                 DBConnection.commit()
-                return {'port': 3456} | {'ip': '192.168.3.206', 'license_key': license_key_}
+                return {'port': 3456} | {'ip': '37.252.84.56', 'license_key': license_key_}
         except Exception as e:
             DBConnection.rollback()
             print(e)
@@ -86,7 +86,7 @@ where
             }
             with DBConnection.create_cursor() as cursor:
                 cursor.execute(""" 
-                select c_t_tarif_id as tarif_id, end_license::date<>current_date as date_state  from client_tarif ct where c_t_id = 
+                select c_t_tarif_id as tarif_id, end_license::date>current_date as date_state  from client_tarif ct where c_t_id = 
                 (select c_id
                 from company c where c_unique_id =( select unique_id_cp  from licenses l
                 where license_key = %(lc_key)s

@@ -52,8 +52,9 @@ class ServiceManipulatorTARIFES:
 
     @staticmethod
     def change_valute_to_card(tarif_id):
-        if DatabaseManipulatorTARIFES.change_valute_to_card(tarif_id):
-            return True
+        info_ = DatabaseManipulatorTARIFES.change_valute_to_card(tarif_id)
+        if info_ is not None:
+            return info_
         return
 
     @staticmethod

@@ -20,15 +20,17 @@ class DatabaseManipulatorTARIFES:
     def change_valute_to_card(tarif_id):
         with DBConnection.create_cursor() as cursor:
             try:
+                print(tarif_id)
                 cursor.execute("""
                 UPDATE saved_order_and_tarif SET order_state = TRUE, order_curr_type = 1 
-                WHERE tarif_id_fk = %(tarif_id)s;
+                WHERE tarif_id_fk = %(tarif_id)s returning *;
                 """, {
-                    'tarif_id_fk': tarif_id
+                    'tarif_id': tarif_id
                 })
                 DBConnection.commit()
-                return True
+                return cursor.fetchone()['order_id']
             except Exception as e:
+                print(e)
                 return
 
     @staticmethod

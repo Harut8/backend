@@ -102,10 +102,16 @@ async def get_tarif_details(tarif_id_body: TarifDetailsGet,
 @tarif_app.post(APIRoutes.changetocard)
 async def change_valute_to_card(
         tarif_id_model: TarifDetailsGet,
+        back_task: BackgroundTasks,
         access_token: OAuth2PasswordBearer = Depends(get_current_user)):
     #if bank works okay
-    if SMt.change_valute_to_card(tarif_id_model.tarif_id):
-        return {"status": "ok"}
+    info_ = SMt.change_valute_to_card(tarif_id_model.tarif_id)
+    if info_ is not None:
+        client_token = encode_client_id_for_url(info_)
+        info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
+        if info_:
+            back_task.add_task(send_verify_link_to_client, info_, client_token)
+            return {"status": "ok"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'CHANGING ERROR'})
 
 
