@@ -54,12 +54,12 @@ where
                                    VALUES(%(lc_key)s, %(product_id_fk)s, %(unique_id_cp)s );
                                    INSERT INTO device_info(device_code, device_license_key)
                                    VALUES(%(device_code)s, %(device_lc_key)s);
-                                   INSERT INTO device_port(unique_id_cp, license_key_fk)
-                                   VALUES(%(unique_id_cp)s, %(lc_key)s) 
+                                   INSERT INTO device_port(unique_id_cp,ip_of_client )
+                                   VALUES(%(unique_id_cp)s, (select ip_of_client from client_ip where ip_id = (select max(ip_id) from client_ip))) 
                                    on conflict(unique_id_cp) do
                                    UPDATE SET unique_id_cp = excluded.unique_id_cp where 
                                    device_port.unique_id_cp = %(unique_id_cp)s
-                                   returning port;
+                                   returning port, ip_of_client;
                                    """, {
                     'lc_key': license_key_,
                     'product_id_fk': add_info.product_id,
@@ -67,9 +67,11 @@ where
                     'device_code': add_info.device_code,
                     'device_lc_key': license_key_
                 })
-                port_ = cursor.fetchone()
+                port_ip = cursor.fetchone()
+                port_ = port_ip["port"]
+                ip_ = port_ip["ip_of_client"]
                 DBConnection.commit()
-                return {'port': 3456} | {'ip': '37.252.84.56', 'license_key': license_key_}
+                return {'port': port_} | {'ip': ip_, 'license_key': license_key_}
         except Exception as e:
             DBConnection.rollback()
             print(e)
@@ -111,9 +113,12 @@ where
                     'dev_code': check_info.device_code
                 })
                 tarif_id_and_count_of_product = cursor.fetchall()
+                cursor.execute(""" select port, ip_of_client  from device_port dp  where 
+unique_id_cp = (select unique_id_cp  from licenses l where license_key =%(lc_key)s)  """, {'lc_key': check_info.license_key})
+                info_ip_port = cursor.fetchone()
                 info_of_id = [i['tarif_id'] for i in tarif_id_and_date if i['date_state'] is True]
                 info_of_count = any([True for j in tarif_id_and_count_of_product if j['state'] is True and j['tarif_id'] in info_of_id])
-                return info_of_count
+                return {'state': info_of_count, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
 
         except Exception as e:
             print(e)
