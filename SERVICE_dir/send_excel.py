@@ -13,7 +13,7 @@ def send_mail(send_to,order_id,subject='DOWNLOAD EXCEL',text='DOWNLOAD EXCEL',is
     try:
         print(os.getcwd())
         sender_from = 'testauthor96@mail.ru'
-        password = '7UN5m0AmvhwpsuqQLM9x'
+        password = 'DdTqUhyXiJ6FmMEZCVJN'
         receiver_add = send_to
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
         smtp_server.starttls()  # setting up to TLS connection
