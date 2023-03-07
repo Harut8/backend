@@ -19,6 +19,7 @@ async def add_license(add_info: AddLicenseModel):
 async def check_license(check_info: CheckLicenseModel):
     """if true then license is active"""
     info_ = ServiceManipulatorLICENSE.check_license(check_info)
+    print(info_)
     if info_ is not None:
         return info_
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'LICENSE TIME ERROR'})

@@ -121,7 +121,11 @@ where
                 info_of_id = [i['tarif_id'] for i in tarif_id_and_date if i['date_state'] is True]
                 info_of_count = any(
                     [True for j in tarif_id_and_count_of_product if j['state'] is True and j['tarif_id'] in info_of_id])
-                return {'state': info_of_count, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
+                if info_of_count and info_of_id and info_ip_port is not None:
+                    return {'state': info_of_count, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
+                elif info_of_id and info_ip_port is not None:
+                    return {'state': False, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
+                return {'state': 0}
 
         except Exception as e:
             print(e)
