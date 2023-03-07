@@ -6,7 +6,7 @@ def send_download_links(*, receiver_email: str, message: list):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
         sender_email = 'testauthor96@mail.ru'
-        password = '7UN5m0AmvhwpsuqQLM9x'
+        password = 'DdTqUhyXiJ6FmMEZCVJN'
         receiver_add = receiver_email
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
         msg = MIMEMultipart('alternative')

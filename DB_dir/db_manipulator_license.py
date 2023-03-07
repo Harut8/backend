@@ -108,16 +108,19 @@ where
                 select c_id from company c where c_unique_id =(
                 select unique_id_cp  from licenses l where license_key = %(lc_key)s
                 and %(dev_code)s = (select device_code from device_info di 
-                where device_license_key = %(lc_key)s))) and order_state = true""",{
+                where device_license_key = %(lc_key)s))) and order_state = true""", {
                     'lc_key': check_info.license_key,
                     'dev_code': check_info.device_code
                 })
                 tarif_id_and_count_of_product = cursor.fetchall()
-                cursor.execute(""" select port, ip_of_client  from device_port dp  where 
-unique_id_cp = (select unique_id_cp  from licenses l where license_key =%(lc_key)s)  """, {'lc_key': check_info.license_key})
+                cursor.execute(""" 
+                select port, ip_of_client  from device_port dp  where 
+                unique_id_cp = (select unique_id_cp  from licenses l where license_key =%(lc_key)s)  """,
+                               {'lc_key': check_info.license_key})
                 info_ip_port = cursor.fetchone()
                 info_of_id = [i['tarif_id'] for i in tarif_id_and_date if i['date_state'] is True]
-                info_of_count = any([True for j in tarif_id_and_count_of_product if j['state'] is True and j['tarif_id'] in info_of_id])
+                info_of_count = any(
+                    [True for j in tarif_id_and_count_of_product if j['state'] is True and j['tarif_id'] in info_of_id])
                 return {'state': info_of_count, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
 
         except Exception as e:

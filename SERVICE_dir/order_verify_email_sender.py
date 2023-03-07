@@ -16,7 +16,7 @@ def send_order_verify_link_email(*, receiver_email: str, message: str):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
         sender_email = 'testauthor96@mail.ru'
-        password = '7UN5m0AmvhwpsuqQLM9x'
+        password = 'DdTqUhyXiJ6FmMEZCVJN'
         receiver_add = receiver_email
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
         msg = MIMEMultipart('alternative')

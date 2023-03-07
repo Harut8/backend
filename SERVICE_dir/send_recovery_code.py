@@ -6,7 +6,7 @@ def send_recovery_code(*, receiver_email: str):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
         sender_email = 'testauthor96@mail.ru'
-        password = '7UN5m0AmvhwpsuqQLM9x'
+        password = 'DdTqUhyXiJ6FmMEZCVJN'
         receiver_add = receiver_email
         message = "".join([str(random.randint(0, 9)) for i in range(9)])
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
