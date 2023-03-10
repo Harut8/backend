@@ -9,6 +9,7 @@ from configparser import ConfigParser
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
 from DB_dir.db_connection import DatabaseConnection
 
+
 conf = ConfigParser()
 conf.read('API_dir/API_CONFIG.ini')
 host = conf.get('API', 'host')
@@ -17,6 +18,7 @@ main_app.include_router(account_app)
 main_app.include_router(tarif_app)
 main_app.include_router(admin_app)
 main_app.include_router(license_app)
+
 origins = ["*"]
 
 main_app.add_middleware(

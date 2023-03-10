@@ -8,12 +8,18 @@ class DatabaseManipulatorLICENSE:
     @staticmethod
     def add_license_to_table(add_info: AddLicenseModel):
         try:
+            product_id_table = {
+                1: 'cass_stantion_count',
+                2: 'mobile_cass_count',
+                3: 'web_manager_count',
+                4: 'mobile_manager_count'
+            }
             with DBConnection.create_cursor() as cursor:
                 license_key_ = token_hex(32)
-                cursor.execute("""
+                cursor.execute(f"""
                 select
 case 
-	when (sum(cass_stantion_count)-
+	when (sum({product_id_table[add_info.product_id]})-
 case
 		when (
 		select

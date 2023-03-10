@@ -8,3 +8,5 @@ jose
 starlette~=0.22.0
 redis~=4.4.2
 num2words~=0.5.12
+celery~=5.2.7
+openpyxl~=3.0.10

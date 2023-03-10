@@ -89,6 +89,8 @@ async def buy_tarife_by_card(
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
 
+#@tarif_app.post('/buyfree')...
+
 @tarif_app.post(APIRoutes.acc_get_tarif_details)
 async def get_tarif_details(tarif_id_body: TarifDetailsGet,
                             access_token: OAuth2PasswordBearer = Depends(get_current_user)):
