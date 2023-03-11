@@ -50,7 +50,7 @@ where
 		company c
 	where
 		c_unique_id = %(unique_id)s)
-	and order_state = true""", {'unique_id': add_info.unique_code,
+	and order_state = true """, {'unique_id': add_info.unique_code,
                                 'product_id': add_info.product_id})
                 if cursor.fetchone()['state_of_license'] != True:
                     return
