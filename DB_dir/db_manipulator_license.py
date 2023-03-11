@@ -114,6 +114,7 @@ where
                     'dev_code': check_info.device_code
                 })
                 tarif_id_and_date = cursor.fetchall()
+                print(check_info)
                 cursor.execute(f"""
                 select tarif_id_fk as tarif_id,
                 case 
