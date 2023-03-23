@@ -20,6 +20,7 @@ class DatabaseManipulatorADMIN:
                 from saved_order_and_tarif soat 
                 where order_state = %(order_state)s 
                 and order_curr_type in  %(order_curr_type)s
+                order by order_date desc
                 """, {
                     "order_state": order_state,
                     "order_curr_type": order_curr_type

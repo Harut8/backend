@@ -17,9 +17,9 @@ def send_download_links(*, receiver_email: str, message: list):
         smtp_server.login(sender_email, password) #logging into out email id
         text = "DOWNLOAD PCASSA APPS"
         link_for_desktop_cassa = u'<a href="{mes}">CLICK TO DOWNLOAD DESKTOP CASSA</a>'.format(mes=message[0])
-        link_for_mobile_cassa = u'<a href="{mes}">CLICK TO DOWNLOAD DESKTOP CASSA</a>'.format(mes=message[1])
-        link_for_web_manager = u'<a href="{mes}">CLICK TO DOWNLOAD DESKTOP CASSA</a>'.format(mes=message[2])
-        link_for_mobile_manager = u'<a href="{mes}">CLICK TO DOWNLOAD DESKTOP CASSA</a>'.format(mes=message[3])
+        link_for_mobile_cassa = u'<a href="{mes}">CLICK TO DOWNLOAD MOBILE CASSA</a>'.format(mes=message[1])
+        link_for_web_manager = u'<a href="{mes}">CLICK TO DOWNLOAD WEB MANAGER</a>'.format(mes=message[2])
+        link_for_mobile_manager = u'<a href="{mes}">CLICK TO DOWNLOAD MOBILE MANAGER</a>'.format(mes=message[3])
         html = f"""\
         <html>
           <head></head>
