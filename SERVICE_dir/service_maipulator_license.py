@@ -17,3 +17,10 @@ class ServiceManipulatorLICENSE:
         if info_ is not None:
             return info_
         return
+
+    @staticmethod
+    def get_license_type(license_key):
+        info_ = DatabaseManipulatorLICENSE.get_license_type(license_key)
+        if info_ is not None:
+            return info_
+        return None

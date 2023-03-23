@@ -27,4 +27,5 @@ class APIRoutes:
 
     addlicense = '/addlicense'
     checklicense = '/checklicense'
+    licensetype = '/licensetype'
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from .api_routes import APIRoutes
-from MODELS_dir.license_model import CheckLicenseModel, AddLicenseModel
+from MODELS_dir.license_model import CheckLicenseModel, AddLicenseModel, GetLicenseType
 from SERVICE_dir.service_maipulator_license import ServiceManipulatorLICENSE
 
 
@@ -23,3 +23,11 @@ async def check_license(check_info: CheckLicenseModel):
     if info_ is not None:
         return info_
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'LICENSE TIME ERROR'})
+
+
+@license_app.post(APIRoutes.licensetype)
+async def get_license_type(license_type: GetLicenseType):
+    info_ = ServiceManipulatorLICENSE.get_license_type(license_type.license_key)
+    if info_ is not None:
+        return info_
+    raise HTTPException(status_code=400, detail='ERROR', headers={'status': 'LICENSE ERROR'})

@@ -147,3 +147,29 @@ where
         except Exception as e:
             print(e)
             return
+
+    @staticmethod
+    def get_license_type(license_key):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""
+                SELECT 
+                    case 
+                        when (true in (select tarif_id_fk=1 from saved_order_and_tarif 
+                        where company_id = (
+                        select c_id from company
+                        where c_unique_id = ( select distinct unique_id_cp from licenses where license_key = %(lic_key)s)
+                        ) ))
+                        then true
+                    else
+                        false
+                    end as type_of
+                    
+                """, {
+                    "lic_key": license_key
+                })
+                return cursor.fetchone()["type_of"]
+        except Exception as e:
+            print(e)
+            return
+

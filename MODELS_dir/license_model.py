@@ -19,3 +19,7 @@ class CheckLicenseModel(BaseModel):
     license_key: str
     device_code: str
     product_id: int = Field(gt=0, le=4)
+
+
+class GetLicenseType(BaseModel):
+    license_key: str
