@@ -18,6 +18,7 @@ class APIRoutes:
     buybytransfer = '/buybytransfer'
     buybycard = '/buybycard'
     changetocard = '/changetocard'
+    free = '/free'
 
 
     verifyorder = '/verifyorder/'
