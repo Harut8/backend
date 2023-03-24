@@ -26,8 +26,11 @@ def send_download_links(*, receiver_email: str, message: list):
           <body>
                 <h2 color='red'> PCASSA </h2>
                {link_for_desktop_cassa if message[0] is not None else ''}
+               </br>
                {link_for_mobile_cassa if message[1] is not None else ''}
+               </br>
                {link_for_web_manager if message[2] is not None else ''}
+               </br>
                {link_for_mobile_manager if message[3] is not None else ''}
           </body>
         </html>
