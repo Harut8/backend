@@ -8,10 +8,10 @@ from SERVICE_dir.order_verify_email_sender import send_order_verify_link_email, 
 from SERVICE_dir.links_for_download_send import send_download_links
 
 
-def send_link_for_download(order_id_token):
+def send_link_for_download(order_id_token, email_):
     print('mtav')
     info_ = ServiceManipulatorADMIN.links_for_downloading(order_id_token)
-    send_download_links(receiver_email='har.avetisyan2002@gmail.com', message= info_)
+    send_download_links(receiver_email=email_, message=info_)
 
 
 def send_verify_link_to_client(client_email, client_token):
@@ -23,8 +23,10 @@ def send_verify_link_to_client(client_email, client_token):
 async def client_verify_payment_link(client_token: str, send_link: BackgroundTasks):
     #send_link.add_task(send_link_for_download, client_token)
     if ServiceManipulatorADMIN.verify_payment_of_client(client_token):
-        send_link.add_task(send_link_for_download, client_token)
-        return RedirectResponse('http://pcassa.ru/')
+        email_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
+        if email_ is not None:
+            send_link.add_task(send_link_for_download, client_token, email_)
+            return RedirectResponse('http://pcassa.ru/')
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'SET PAYMENT ERROR'})
 
 
