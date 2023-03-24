@@ -71,6 +71,22 @@ async def buy_tarife_by_transfer(personal_tarife: BuyTarifeByTransfer,
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
 
+@tarif_app.post(APIRoutes.free)
+async def buy_free_tarif(personal_tarife: BuyTarifeByTransfer,
+                         back_task: BackgroundTasks,
+                         access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+    personal_tarife.client_token = access_token
+    state_of_buy = SMt.post_transfer_tarif(personal_tarife, valute=2)
+    if state_of_buy is not None:
+        client_token = encode_client_id_for_url(state_of_buy["order_id"])
+        info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
+        if info_:
+            back_task.add_task(send_verify_link_to_client, info_, client_token)
+            return {"status": "ok", "message": "VERIFY LINK SENDED"}
+        return {"status": "ok", "message": "VERIFY LINK NOT SENDED"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
+
+
 @tarif_app.post(APIRoutes.buybycard)
 async def buy_tarife_by_card(
         personal_tarife: BuyTarifeByTransfer,
