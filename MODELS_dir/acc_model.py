@@ -115,6 +115,7 @@ class AccountViewInnerModel(BaseModel):
     t_name: str | None
     end_license: Any
     order_state: bool
+    links: list
 
 
 class AccountViewModel(BaseModel):
