@@ -283,6 +283,7 @@ class DatabaseManipulatorACCOUNT:
                     cursor.execute(""" 
                                     SELECT * from get_links_state((select order_id from saved_order_and_tarif where tarif_id_fk=%(t_id)s));
                                     """, {'t_id': i['t_id']})
+                    #print(i, cursor.fetchall())
                     fk_data += [i | {"links": cursor.fetchall()}]
                     #print(i, "----------------")
                 #print(fk_data)
