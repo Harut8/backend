@@ -15,6 +15,8 @@ class DatabaseManipulatorLICENSE:
                 4: 'mobile_manager_count'
             }
             with DBConnection.create_cursor() as cursor:
+                # cursor.execute("""
+                # """)
                 license_key_ = token_hex(32)
                 cursor.execute(f"""
                 select
@@ -43,11 +45,29 @@ where
                 """, {'unique_id': add_info.unique_code,
                                 'product_id': add_info.product_id})
                 if cursor.fetchone()['state_of_license'] != True:
-                    print(5555)
+                    cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s
+                                    and device_code = (select device_code from uniqunes_product where device_code = %(device_code)s
+                                    and product_id = %(product_id)s)
+                                     """, {
+                        "device_code": add_info.device_code,
+                        'product_id': add_info.product_id
+                    })
+                    juts_ = cursor.fetchone()
+                    print(juts_)
+                    if juts_ is not None:
+                        license_key_ = juts_['device_license_key']
+                        cursor.execute("""select port, ip_of_client from device_port where unique_id_cp = %(uni)s """,
+                                       {"uni": add_info.unique_code})
+                        info_ = cursor.fetchone()
+                        return {"port": info_["port"], "ip": info_["ip_of_client"], "license_key": license_key_}
                     return
+
                 cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s
+                and device_code = (select device_code from uniqunes_product where device_code = %(device_code)s
+                and product_id = %(product_id)s)
                  """,{
-                    "device_code": add_info.device_code
+                    "device_code": add_info.device_code,
+                    'product_id': add_info.product_id
                 })
                 juts_ = cursor.fetchone()
                 print(juts_)
