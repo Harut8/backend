@@ -45,10 +45,12 @@ where
                 if cursor.fetchone()['state_of_license'] != True:
                     print(5555)
                     return
-                cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s """,{
+                cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s
+                 """,{
                     "device_code": add_info.device_code
                 })
                 juts_ = cursor.fetchone()
+                print(juts_)
                 if juts_ is not None:
                     license_key_ = juts_['device_license_key']
                     cursor.execute("""select port, ip_of_client from device_port where unique_id_cp = %(uni)s """,
@@ -61,8 +63,10 @@ where
                                    VALUES(%(lc_key)s, %(product_id_fk)s, %(unique_id_cp)s );
                                    INSERT INTO device_info(device_code, device_license_key)
                                    VALUES(%(device_code)s, %(device_lc_key)s);
-                                   INSERT INTO device_port(unique_id_cp,ip_of_client )
-                                   VALUES(%(unique_id_cp)s, (select ip_of_client from client_ip where ip_id = (select max(ip_id) from client_ip)))
+                                   INSERT INTO device_port(port,unique_id_cp,ip_of_client )
+                                   VALUES(( select coalesce( max(port)+1,4000) from device_port), %(unique_id_cp)s,
+                                    (select ip_of_client from client_ip where 
+                                   ip_id = (select max(ip_id) from client_ip)))
                                    on conflict(unique_id_cp) do
                                    UPDATE SET unique_id_cp = excluded.unique_id_cp where
                                    device_port.unique_id_cp = %(unique_id_cp)s
