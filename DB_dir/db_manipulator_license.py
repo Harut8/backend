@@ -16,26 +16,16 @@ class DatabaseManipulatorLICENSE:
             }
             with DBConnection.create_cursor() as cursor:
                 license_key_ = token_hex(32)
-                cursor.execute(f"""select
+                cursor.execute(f"""
+                select
 case 
   when (sum({product_id_table[add_info.product_id]})-
-case
-    when (
-    select
+  (select
       count(product_id_fk)
     from
       licenses l
     where
-      product_id_fk = %(product_id)s and unique_id_cp = %(unique_id)s) is not null
-  then (
-    select
-      count(product_id_fk)
-    from
-      licenses l
-    where
-      product_id_fk = %(product_id)s  and unique_id_cp = %(unique_id)s )
-    else 0
-  end ) >0 then true 
+      product_id_fk = %(product_id)s  and unique_id_cp = %(unique_id)s )) >0 then true 
   else false
 end
  as state_of_license
@@ -49,9 +39,11 @@ where
     company c
   where
     c_unique_id = %(unique_id)s)
-  and order_state = true""", {'unique_id': add_info.unique_code,
+  and order_state = true;
+                """, {'unique_id': add_info.unique_code,
                                 'product_id': add_info.product_id})
                 if cursor.fetchone()['state_of_license'] != True:
+                    print(5555)
                     return
                 cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s """,{
                     "device_code": add_info.device_code
