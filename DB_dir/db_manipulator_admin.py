@@ -9,6 +9,7 @@ class DatabaseManipulatorADMIN:
             with DBConnection.create_cursor() as connection:
                 connection.execute("""
                 select order_id,
+                       
                        order_summ,
                        cass_stantion_count,
                        mobile_cass_count,
@@ -133,5 +134,37 @@ $$
             print(e)
             return
 
+    @staticmethod
+    def get_dillers():
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute(
+                    """
+                    select d.d_name, d.d_id from diller d order by d.d_id;
+                    """
+                )
+                info_ = cursor.fetchall()
+                return info_
+        except Exception as e:
+            print(e)
+            return
+
+    @staticmethod
+    def get_comapnies():
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute(
+                    """
+                    with cte as (
+                    select c_unique_id,c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn,
+                    row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer
+                    from company c) select * from cte;
+                    """
+                )
+                info_ = cursor.fetchall()
+                return info_
+        except Exception as e:
+            print(e)
+            return
 
 

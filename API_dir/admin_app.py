@@ -45,3 +45,11 @@ async def admin_get_payment_list(type_of_payment: PaymentListEnum):
     if info_ is not None:
         return info_
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'GET PAYMENT ERROR'})
+
+
+@admin_app.get('/admin/company')
+async def get_companies():
+    info_ = ServiceManipulatorADMIN.get_companies()
+    if info_:
+        return info_
+    raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'ERROR'})

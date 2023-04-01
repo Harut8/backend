@@ -89,3 +89,16 @@ class ServiceManipulatorADMIN:
                 return
             case _:
                 return
+
+    @staticmethod
+    def get_companies():
+        dillers = DatabaseManipulatorADMIN.get_dillers()
+        companies = DatabaseManipulatorADMIN.get_comapnies()
+        return_data = {i["d_id"]: [] for i in dillers}
+        if companies:
+            for i in companies:
+                return_data[i["c_diller_id"]] += [i.items()]
+            for i in dillers:
+                return_data[i["d_name"]] = return_data.pop(i["d_id"])
+
+        return return_data
