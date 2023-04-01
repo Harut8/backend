@@ -58,23 +58,53 @@ class ServiceManipulatorTARIFES:
         return
 
     @staticmethod
-    def post_transfer_tarif(
-            item: BuyTarifeByTransfer,
-            valute: int):
+    def post_transfer_tarif(*,
+                            item: BuyTarifeByTransfer,
+                            valute: int,
+                            type_of: str,
+                            bank_order_id: str = None):
         try:
+            if type_of == "pre":
+                print(888)
+                temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_bank_order(
+                    tarif_id=item.tarif_id,
+                    order_summ=item.order_summ,
+                    cass_stantion_count=item.cass_stantion_count,
+                    mobile_cass_count=item.mobile_cass_count,
+                    mobile_manager_count=item.mobile_manager_count,
+                    web_manager_count=item.web_manager_count,
+                    client_token=item.client_token,
+                    interval=item.interval,
+                    valute=valute,
+                    bank_order_id=bank_order_id
+                )
+                if temp_:
+                    return temp_
+            elif type_of == "aft":
+                temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_order(
+                    tarif_id=item.tarif_id,
+                    order_summ=item.order_summ,
+                    cass_stantion_count=item.cass_stantion_count,
+                    mobile_cass_count=item.mobile_cass_count,
+                    mobile_manager_count=item.mobile_manager_count,
+                    web_manager_count=item.web_manager_count,
+                    client_token=item.client_token,
+                    interval=item.interval,
+                    valute=valute
+                )
+                if temp_:
+                    return temp_
+        except Exception as e:
+            print(e)
+            return
 
-            temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_order(
-                order_summ=item.order_summ,
-                cass_stantion_count=item.cass_stantion_count,
-                mobile_cass_count=item.mobile_cass_count,
-                mobile_manager_count=item.mobile_manager_count,
-                web_manager_count=item.web_manager_count,
-                client_token=item.client_token,
-                interval=item.interval,
-                valute=valute
-            )
+    @staticmethod
+    def update_bank_id(*, order_id, bank_order_id):
+        try:
+            temp_ = DatabaseManipulatorTARIFES.update_bank_id(order_id=order_id, bank_order_id=bank_order_id)
             if temp_:
                 return temp_
+            return
         except Exception as e:
             print(e)
             return
@@ -95,12 +125,16 @@ class ServiceManipulatorTARIFES:
                         inner_content=InnerModelForTarif(
                             cassa_names=i['cassa_names'][lan_],
                             cassa_counts=i['cassa_counts'],
+                            cassa_prices=i['c_per_price'],
                             manager_names=i['manager_names'][lan_],
                             manager_counts=i['manager_counts'],
+                            manager_prices=i['m_per_price'],
                             web_names=i['web_names'][lan_],
                             web_counts=i['web_counts'],
+                            web_prices=i['w_m_per_price'],
                             mobile_cassa_names=i['mobile_cassa_names'][lan_],
                             mobile_cassa_counts=i['mobile_cassa_counts'],
+                            mobile_prices=i['m_c_per_price'],
                             tarifes_others=i['tarifes_others'],)
                     )
                     for i in temp_

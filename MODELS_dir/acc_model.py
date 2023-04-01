@@ -30,6 +30,7 @@ class AccountRegModel(BaseModel):
     acc_pass: str
     acc_phone: str
     acc_address: str | None
+    acc_country: int = Field(default=1)
     acc_inn: str | None = Field(default=None, description="Идентификационный номер налогоплательщика", regex=r'\d{1,15}')
     acc_kpp: str | None = Field(default=None, description="код причины постановки", regex=r'\d{1,15}')
     acc_bik: str | None = Field(default=None, description="Бик (банковский идентификационный код)", regex=r'\d{1,15}')
@@ -121,10 +122,25 @@ class AccountViewInnerModel(BaseModel):
 class AccountViewModel(BaseModel):
     c_id: int
     c_name: str
+    c_unique_id: str
     c_contact_name: str
     c_phone: str
     c_email: str
     tarif_list: list[AccountViewInnerModel]
+
+
+class Refresh(BaseModel):
+    refresh_token: str
+
+
+class OrderEmailModel(BaseModel):
+    acc_contact_name: str
+    acc_org_name: str
+    acc_email: str
+    acc_phone: str
+    acc_address: str 
+    acc_country: str 
+    acc_inn: str = Field(default=None, description="Идентификационный номер налогоплательщика", regex=r'\d{1,15}')
 
 
 class Language(Enum):

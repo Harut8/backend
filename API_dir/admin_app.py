@@ -19,14 +19,17 @@ def send_verify_link_to_client(client_email, client_token):
     send_order_verify_link_email(receiver_email=client_email, message=gen_url)
 
 
-@admin_app.get(APIRoutes.verifypayment)
+@admin_app.get(APIRoutes.verifypayment+'/')
+#@admin_app.security.AllowAny
 async def client_verify_payment_link(client_token: str, send_link: BackgroundTasks):
     #send_link.add_task(send_link_for_download, client_token)
+    print(55555)
     if ServiceManipulatorADMIN.verify_payment_of_client(client_token):
         email_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
         if email_ is not None:
             send_link.add_task(send_link_for_download, client_token, email_)
-            return RedirectResponse('http://pcassa.ru/')
+            return RedirectResponse('https://pcassa.ru/')
+            #return "ok"
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'SET PAYMENT ERROR'})
 
 

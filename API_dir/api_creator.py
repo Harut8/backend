@@ -13,6 +13,7 @@ from DB_dir.db_connection import DatabaseConnection
 conf = ConfigParser()
 conf.read('API_dir/API_CONFIG.ini')
 host = conf.get('API', 'host')
+#main_app = FastAPI(docs_url=None, redoc_url=None)
 main_app = FastAPI()
 main_app.include_router(account_app)
 main_app.include_router(tarif_app)
@@ -54,7 +55,7 @@ async def add_process_time_header(request: Request, call_next):
 
 def start_server():
     """Start server"""
-    run(main_app, host=host)
+    run(main_app, host=host, port=8000)
 
 
 #192.168.3.250

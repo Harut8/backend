@@ -23,3 +23,7 @@ class CheckLicenseModel(BaseModel):
 
 class GetLicenseType(BaseModel):
     license_key: str
+
+class GetPortForSuro(BaseModel):
+    u_id: str
+    lc_key: str

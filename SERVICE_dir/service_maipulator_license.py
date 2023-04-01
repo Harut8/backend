@@ -24,3 +24,10 @@ class ServiceManipulatorLICENSE:
         if info_ is not None:
             return info_
         return None
+
+    @staticmethod
+    def get_port_for_suro(u_id, lc_key):
+        info_ = DatabaseManipulatorLICENSE.get_port_for_suro(u_id, lc_key)
+        if info_ is not None:
+            return info_
+        return None

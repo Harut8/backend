@@ -1,6 +1,8 @@
 import jose.jwe
+import requests
 from fastapi import HTTPException, status, Depends, APIRouter, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from starlette.responses import RedirectResponse
 
 from SERVICE_dir.admin_client_secure import encode_client_id_for_url
 from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
@@ -87,25 +89,48 @@ async def buy_free_tarif(personal_tarife: BuyTarifeByTransfer,
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
 
+@tarif_app.get("/checkpayment")
+async def check_payment(orderId: str, client_token: str, lang: str, back_task: BackgroundTasks):
+    checking = requests.post(
+        f"""https://alfa.rbsuat.com/payment/rest/getOrderStatusExtended.do?orderId={orderId}&token=snsf2mafqocsnn25tbdhcve8sj""")
+    checking = checking.json()
+    print(checking)
+    if checking["orderStatus"] == 2 and checking[" errorCode"] == 0:
+        print(checking)
+        info_ = 1
+        # info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token, "pre")
+        if info_:
+            # back_task.add_task(send_verify_link_to_client, info_, client_token)
+            return {"status": "ok", "message": "VERIFY LINK SENDED"}
+    else:
+        raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
+
+
 @tarif_app.post(APIRoutes.buybycard)
 async def buy_tarife_by_card(
         personal_tarife: BuyTarifeByTransfer,
-        back_task: BackgroundTasks,
         access_token: OAuth2PasswordBearer = Depends(get_current_user)):
-    #if bank works okay
+    # if bank works okay
     personal_tarife.client_token = access_token
-    state_of_buy = SMt.post_transfer_tarif(personal_tarife, valute=1)
+    state_of_buy = SMt.post_transfer_tarif(item=personal_tarife, valute=1, type_of="pre")
+    if not state_of_buy:
+        print(999)
+        raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
+    order_id = state_of_buy["order_id"]
+    client_token = encode_client_id_for_url(order_id)
+    url_for_return = f"""https://alfa.rbsuat.com/payment/rest/register.do?token=snsf2mafqocsnn25tbdhcve8sj&orderNumber={order_id}&amount={personal_tarife.order_summ}&returnUrl=http%3A%2F%2F192.168.0.102%3A8000%2Fcheckpayment%3Fclient_token%3D{client_token}"""
+    bank_check = requests.post(url_for_return)
+    bank_check = bank_check.json()
+    state_of_buy = SMt.update_bank_id(order_id=order_id, bank_order_id=bank_check["orderId"])
+    personal_tarife.client_token = access_token
+
     if state_of_buy is not None:
-        client_token = encode_client_id_for_url(state_of_buy["order_id"])
-        info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
-        if info_:
-            back_task.add_task(send_verify_link_to_client, info_, client_token)
-            return {"status": "ok", "message": "VERIFY LINK SENDED"}
-        return {"status": "ok"}
+        # 127.0.0.1/checkpayment?order_id={bank_check["orderId"]}&client_token={access_token}
+        # client_token = encode_client_id_for_url(state_of_buy["order_id"])
+        print(bank_check["formUrl"])
+        return RedirectResponse(bank_check["formUrl"])
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
-
-#@tarif_app.post('/buyfree')...
 
 @tarif_app.post(APIRoutes.acc_get_tarif_details)
 async def get_tarif_details(tarif_id_body: TarifDetailsGet,

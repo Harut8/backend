@@ -3,7 +3,7 @@ import redis
 import asyncio
 from DB_dir.db_manipulator_account import DatabaseManipulatorACCOUNT as DBManipulator
 from MODELS_dir.acc_model import AccountRegModel
-from MODELS_dir.acc_model import AccountSignModel, AccountViewModel, AccountViewInnerModel
+from MODELS_dir.acc_model import AccountSignModel, AccountViewModel, AccountViewInnerModel, OrderEmailModel
 from SERVICE_dir import verify_email_sender as ves
 from SERVICE_dir import send_recovery_code as src
 from SERVICE_dir import send_unique_id as sui
@@ -35,8 +35,9 @@ class ServiceManipulatorACCOUNT:
         try:
             d = ("cass_stantion_name",
                  "mobile_cass_name",
+                 "web_manager_name",
                  "mobile_manager_name",
-                 "web_manager_name")
+                 )
 
             info_ = DBManipulator.get_links()
             if info_ is not None:
@@ -44,6 +45,15 @@ class ServiceManipulatorACCOUNT:
             return
         except Exception as e:
             raise e
+
+    @staticmethod
+    def order_email(order_model: OrderEmailModel):
+        try:
+            if DBManipulator.order_email(item=order_model):
+                return True
+        except Exception as e:
+            print(e)
+            return None
 
     @staticmethod
     async def post_acc_into_temp_db(temp_acc_model: AccountRegModel):
@@ -156,6 +166,7 @@ class ServiceManipulatorACCOUNT:
             print(tmp_)
             return AccountViewModel(
                 c_id=tmp_["c_id"],
+                c_unique_id=tmp_["c_unique_id"],
                 c_name=tmp_["c_name"],
                 c_contact_name=tmp_["c_contact_name"],
                 c_phone=tmp_["c_phone"],
@@ -176,6 +187,7 @@ class ServiceManipulatorACCOUNT:
                                   message=f"Your unique code --- {acc_unique_id} ,"
                                           f" Your email --- {acc_email},"
                                           f" Your password --- {pass_for_sending}"):
+                print("email unique")
                 if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
                     return True
             return False

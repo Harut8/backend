@@ -47,6 +47,7 @@ class DatabaseManipulatorADMIN:
 
     @staticmethod
     def verify_payment_of_client(order_id):
+        print(11)
         try:
             with DBConnection.create_cursor() as cursor:
                 cursor.execute("""
@@ -81,12 +82,18 @@ $$
             return
 
     @staticmethod
-    def get_email_for_link(order_id):
+    def get_email_for_link(order_id, if_pre="aft"):
         try:
             with DBConnection.create_cursor() as cursor:
-                cursor.execute("select c_email from company where c_id = "
-                               "(SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)",
-                               {"order_id": int(order_id)})
+                if if_pre == "pre":
+                    cursor.execute("select c_email from company where c_id = "
+                                   "(SELECT company_id from saved_order_and_tarif_bank where order_id = %(order_id)s)",
+                                   {"order_id": int(order_id)})
+                if if_pre == "aft":
+                    cursor.execute("select c_email from company where c_id = "
+                                   "(SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)",
+                                   {"order_id": int(order_id)})
+                # print(or)
                 return cursor.fetchone()
         except Exception as e:
             print(e)

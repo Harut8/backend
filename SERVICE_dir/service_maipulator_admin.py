@@ -28,9 +28,12 @@ class ServiceManipulatorADMIN:
         return
 
     @staticmethod
-    def send_email_for_order_verify(order_id_token: str):
+    def send_email_for_order_verify(order_id_token: str, if_pre="aft"):
+        print("ITS TOKEN======")
+        print(order_id_token)
         order_id = decode_client_id_for_verify(order_id_token).sub
-        info_ = DatabaseManipulatorADMIN.get_email_for_link(order_id)
+        info_ = DatabaseManipulatorADMIN.get_email_for_link(order_id, if_pre=if_pre)
+        print(info_)
         if info_ is not None:
             return info_['c_email']
         return
