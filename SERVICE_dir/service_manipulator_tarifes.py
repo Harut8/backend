@@ -64,6 +64,7 @@ class ServiceManipulatorTARIFES:
         try:
 
             temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_order(
+                tarif_id=item.tarif_id,
                 order_summ=item.order_summ,
                 cass_stantion_count=item.cass_stantion_count,
                 mobile_cass_count=item.mobile_cass_count,
@@ -95,12 +96,16 @@ class ServiceManipulatorTARIFES:
                         inner_content=InnerModelForTarif(
                             cassa_names=i['cassa_names'][lan_],
                             cassa_counts=i['cassa_counts'],
+                            cassa_prices=i['c_per_price'],
                             manager_names=i['manager_names'][lan_],
                             manager_counts=i['manager_counts'],
+                            manager_prices=i['m_per_price'],
                             web_names=i['web_names'][lan_],
                             web_counts=i['web_counts'],
+                            web_prices=i['w_m_per_price'],
                             mobile_cassa_names=i['mobile_cassa_names'][lan_],
                             mobile_cassa_counts=i['mobile_cassa_counts'],
+                            mobile_prices=i['m_c_per_price'],
                             tarifes_others=i['tarifes_others'],)
                     )
                     for i in temp_

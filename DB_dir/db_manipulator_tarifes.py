@@ -61,6 +61,7 @@ class DatabaseManipulatorTARIFES:
     @staticmethod
     def post_personal_info_to_order(*,
                                     order_summ,
+                                    tarif_id,
                                     cass_stantion_count,
                                     mobile_cass_count,
                                     mobile_manager_count,
@@ -77,7 +78,7 @@ class DatabaseManipulatorTARIFES:
                     do 
                     $do$
                     declare 
-                    inn_info int;
+                    inn_info bigint;
                     begin
                     SELECT c_inn into inn_info from company where c_token = %(client_token)s;
                     if inn_info is null then 
@@ -92,6 +93,7 @@ class DatabaseManipulatorTARIFES:
                 cursor.execute("""select c_id from company where c_token = %(client_token)s""",{"client_token":client_token})
                 company_id = cursor.fetchone()["c_id"]
                 cursor.execute("""
+                
                 INSERT INTO saved_order_and_tarif(
                                order_summ,
                                cass_stantion_count,
@@ -123,7 +125,10 @@ class DatabaseManipulatorTARIFES:
                                    "valute": valute
                                })
                 info = cursor.fetchone()
-                cursor.execute("SELECT verify_payment(%(order_id)s)", {"order_id": info["order_id"]})
+                print(tarif_id)
+                cursor.execute("SELECT verify_payment(%(order_id)s, %(tarif_id)s)",
+                               {"order_id": info["order_id"],
+                                "tarif_id": tarif_id})
                 DBConnection.commit()
                 return info
             except Exception as e:

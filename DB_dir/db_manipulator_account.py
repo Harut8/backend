@@ -1,5 +1,5 @@
 from .db_connection import DatabaseConnection as DBConnection
-from MODELS_dir.acc_model import AccountRegModel
+from MODELS_dir.acc_model import AccountRegModel, OrderEmailModel
 import hashlib
 
 
@@ -38,6 +38,7 @@ class DatabaseManipulatorACCOUNT:
                 SQL_query = f"""
                                     INSERT INTO temp_company(
                                     t_c_name,
+                                    t_c_country,
                                     t_c_pass,
                                     t_c_contact_name,
                                     t_c_phone,
@@ -53,6 +54,7 @@ class DatabaseManipulatorACCOUNT:
                                     )
                                     VALUES (
                                     %(org_name)s,
+                                    %(t_c_country)s,
                                     '{hash_pass}',
                                     %(contact_name)s,
                                     %(acc_phone)s,
@@ -68,6 +70,7 @@ class DatabaseManipulatorACCOUNT:
                                     """
                 cursor.execute(SQL_query, {
                     'org_name': item.acc_org_name,
+                    't_c_country': item.acc_country,
                     'contact_name': item.acc_contact_name,
                     'acc_phone': item.acc_phone,
                     'acc_email': item.acc_email,
@@ -77,6 +80,48 @@ class DatabaseManipulatorACCOUNT:
                     'acc_r_schet': item.acc_r_schet,
                     'acc_bik': item.acc_bik,
                     'acc_bank_name': item.acc_bank_name,
+                    'acc_address': item.acc_address,
+                })
+                DBConnection.commit()
+                return True
+        except Exception as e:
+            print(e)
+            DBConnection.rollback()
+            return False
+
+    @staticmethod
+    def order_email(*, item: OrderEmailModel):
+        """ INSERT acc INFO INTO TEMP DATABASE"""
+        try:
+            
+            with DBConnection.create_cursor() as cursor:
+                
+                SQL_query = f"""
+                                    INSERT INTO order_tarif_email(
+                                    t_c_name,
+                                    t_c_country,
+                                    t_c_contact_name,
+                                    t_c_phone,
+                                    t_c_email,
+                                    t_c_inn,
+                                    t_c_address
+                                    )
+                                    VALUES (
+                                    %(org_name)s,
+                                    %(t_c_country)s,
+                                    %(contact_name)s,
+                                    %(acc_phone)s,
+                                    %(acc_email)s,
+                                    %(acc_inn)s,
+                                    %(acc_address)s)
+                                    """
+                cursor.execute(SQL_query, {
+                    'org_name': item.acc_org_name,
+                    't_c_country': item.acc_country,
+                    'contact_name': item.acc_contact_name,
+                    'acc_phone': item.acc_phone,
+                    'acc_email': item.acc_email,
+                    'acc_inn': item.acc_inn,
                     'acc_address': item.acc_address,
                 })
                 DBConnection.commit()
@@ -92,9 +137,10 @@ class DatabaseManipulatorACCOUNT:
         """GET ID FROM temp_db FOR ADDING TO COMPANY DB"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""SELECT t_id FROM temp_company WHERE t_c_name = '{name}'"""
-                cursor.execute(SQL_query)
-                print('SUCCESSFULL GETTING NAME')
+                # SQL_query = f"""SELECT t_id FROM temp_company WHERE t_c_name"""
+                cursor.execute("SELECT t_id FROM temp_company WHERE t_c_name = %(t_c_name)s",
+                               {"t_c_name": name})
+                print('SUCCESSFULLY GETTING NAME')
                 return cursor.fetchall()[0]
         except Exception as e:
             print(e)
@@ -106,9 +152,9 @@ class DatabaseManipulatorACCOUNT:
         """GET ID FROM temp_db FOR ADDING TO COMPANY DB"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""SELECT * FROM links"""
+                SQL_query = """SELECT * FROM links order by product_id"""
                 cursor.execute(SQL_query)
-                print('SUCCESSFULL GETTING NAME')
+                print('SUCCESSFULLY GETTING NAME')
                 return cursor.fetchall()
         except Exception as e:
             print(e)
@@ -121,8 +167,11 @@ class DatabaseManipulatorACCOUNT:
             generate link and update column"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""UPDATE temp_company SET t_c_verify_link = '{link}' WHERE t_c_name ='{name}'"""
-                cursor.execute(SQL_query)
+                # SQL_query = f""""""
+                cursor.execute("UPDATE temp_company SET t_c_verify_link = %(link)s WHERE t_c_name =%(name)s", {
+                    "link": link,
+                    "name": name
+                })
                 DBConnection.commit()
                 print('SUCCESS ADD LINK TO temp db')
                 return True
@@ -132,13 +181,13 @@ class DatabaseManipulatorACCOUNT:
             return False
 
     @staticmethod
-    def verify_link(*, temp_id: int):
+    def verify_link(*, temp_id: str):
         """ CALL STORED FUNCTION for verifying
             DELETE FROM temp_company ADD TO company"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""SELECT del_tmp_add_company({temp_id})"""
-                cursor.execute(SQL_query)
+                SQL_query = f"""SELECT del_tmp_add_company(%(tmp_id)s)"""
+                cursor.execute(SQL_query, {"tmp_id": temp_id})
                 DBConnection.commit()
                 print('SUCCESS TO VERIFY LINK')
                 data = cursor.fetchone()
@@ -171,7 +220,7 @@ class DatabaseManipulatorACCOUNT:
         """ UPDATE PASSWORD OF ACCOUNT AN THIS EMAIL"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""UPDATE company SET c_pass = %(pass)s WHERE c_email = %(email)s"""
+                SQL_query = """UPDATE company SET c_pass = %(pass)s WHERE c_email = %(email)s"""
                 hash_str = hashlib.sha256(acc_pass.encode())
                 hash_pass = hash_str.hexdigest()
                 cursor.execute(SQL_query, {'email': acc_email, 'pass': hash_pass})
@@ -188,7 +237,7 @@ class DatabaseManipulatorACCOUNT:
         """ UPDATE TOKEN OF ACCOUNT"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""UPDATE company SET c_token = %(access_token)s WHERE c_id = %(c_id)s"""
+                SQL_query = """UPDATE company SET c_token = %(access_token)s WHERE c_id = %(c_id)s"""
                 cursor.execute(SQL_query,
                                {'access_token': access_token,
                                 'c_id': acc_id})
@@ -261,6 +310,7 @@ class DatabaseManipulatorACCOUNT:
         try:
             with DBConnection.create_cursor() as cursor:
                 SQL_query = """SELECT c_id,
+                                      c_unique_id,
                                       c_name,
                                       c_contact_name,
                                       c_phone,
@@ -277,7 +327,8 @@ class DatabaseManipulatorACCOUNT:
                       true as order_state
                 FROM tarif 
                 join client_tarif ct on ct.c_t_id = %(client_id)s and ct.c_t_tarif_id  = t_id
-                where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s)
+                where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s
+                and for_view=true)
                 union all
                 SELECT 
                       distinct t_id,
@@ -286,21 +337,13 @@ class DatabaseManipulatorACCOUNT:
                       false as order_state
                 FROM tarif 
                 where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s
+                and for_view=true
                 except select c_t_tarif_id  from client_tarif ct2  where c_t_id  = %(client_id)s)
                                """,
                                {"client_id": data['c_id'],
                                 "lan_num": lan_num})
 
                 data2 = cursor.fetchall()
-                # fk_data = []
-                # for i in data2:
-                #     cursor.execute("""
-                #                     SELECT * from get_links_state((select order_id from saved_order_and_tarif where tarif_id_fk=%(t_id)s));
-                #                     """, {'t_id': i['t_id']})
-                #     #print(i, cursor.fetchall())
-                #     fk_data += [i | {"links": cursor.fetchall()}]
-                    #print(i, "----------------")
-                #print(fk_data)
                 data = data | {"tarif_list": data2}
                 if data is None:
                     SQL_query = """SELECT c_name, d_name FROM company c
@@ -311,7 +354,6 @@ class DatabaseManipulatorACCOUNT:
                     if data is not None:
                         return data
                     elif data is None:
-                        #change to token
                         SQL_query = """SELECT d_name, d_contact_name, d_phone, d_email FROM diller
                                            WHERE d_email = %(acc_email)s AND d_pass = %(acc_pass)s"""
                         cursor.execute(SQL_query, {'acc_email': 'ddd', 'acc_pass': 'wjw'})
@@ -326,28 +368,4 @@ class DatabaseManipulatorACCOUNT:
             DBConnection.rollback()
             return
 
-    # @staticmethod
-    # def add_access_token_to_account(*, access_token: str, account_id: str):
-    #     try:
-    #         with DBConnection.create_cursor() as cursor:
-    #             cursor.execute(
-    #                 """ UPDATE company SET c_token = %(access_token)s WHERE c_id = %(account_id)s""",
-    #                 {'access_token': access_token,
-    #                  'account_id': account_id
-    #                  })
-    #             DBConnection.commit()
-    #             return True
-    #     except Exception as e:
-    #         print(e)
-    #         DBConnection.rollback()
-    #         return None
-
-    @staticmethod
-    def decorator_for_cursor_create():
-        try:
-            with DBConnection.create_cursor() as cursor:
-                pass
-        except Exception as e:
-            print(e)
-            return None
 

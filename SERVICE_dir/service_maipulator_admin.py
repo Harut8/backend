@@ -31,6 +31,7 @@ class ServiceManipulatorADMIN:
     def send_email_for_order_verify(order_id_token: str):
         order_id = decode_client_id_for_verify(order_id_token).sub
         info_ = DatabaseManipulatorADMIN.get_email_for_link(order_id)
+        print(info_)
         if info_ is not None:
             return info_['c_email']
         return

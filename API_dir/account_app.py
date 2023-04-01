@@ -4,13 +4,13 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
 
-from MODELS_dir.acc_model import Language
+from MODELS_dir.acc_model import Language, Refresh, OrderEmailModel
 from SERVICE_dir.jwt_logic import JWTParamas, create_access_token, create_refresh_token, TokenPayload
-from .api_routes import APIRoutes
+from API_dir.api_routes import APIRoutes
 from MODELS_dir import acc_model as AccountModel
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
 from starlette.responses import RedirectResponse
-
+from SERVICE_dir.send_order_email import send_order_email
 
 account_app = APIRouter(tags=["ACCOUNT FUNCTIONALITY"])
 
@@ -20,8 +20,8 @@ account_app = APIRouter(tags=["ACCOUNT FUNCTIONALITY"])
             TOKEN FUNCTIONALITY                             
     #################################
 """
-reuseable_oauth = OAuth2PasswordBearer(
-    tokenUrl="/signin",
+reusable_oauth = OAuth2PasswordBearer(
+    tokenUrl="/signin/",
     scheme_name="JWT"
 )
 
@@ -34,7 +34,7 @@ IN FUTURE WILL DECODE AND GET ID OF CLIENT
 """
 
 
-async def get_current_user(token: str = Depends(reuseable_oauth)):
+async def get_current_user(token: str = Depends(reusable_oauth)):
     """CHECK INVALID TOKENS
        CHECK EXPIRED TOKENS"""
     try:
@@ -61,16 +61,11 @@ async def get_current_user(token: str = Depends(reuseable_oauth)):
 async def update_token_of_user(account_id, access_token):
     SMa.auto_update_token_for_account(account_id=account_id, access_token=access_token)
 
-
-async def send_verify_email(*arg):
-    SMa.call_async_function(acc_email=arg[0], generated_link=arg[1])
-
 """ #################################
                    END
             TOKEN FUNCTIONALITY                             
     #################################
 """
-
 
 
 """ --------------START ACCOUNT API-s---------------
@@ -83,6 +78,15 @@ async def send_verify_email(*arg):
 """
 
 
+async def send_verify_email(*arg):
+    SMa.call_async_function(acc_email=arg[0], generated_link=arg[1])
+
+
+async def send_order_email_(*arg):
+    """SEND ORDER TO 3 EMAILS (ZAYAVKA)"""
+    send_order_email(receiver_email=arg[0], message_=arg[1])
+
+
 @account_app.post(APIRoutes.acc_register_route)
 async def acc_signup(acc_reg_model: AccountModel.AccountRegModel, back_task: BackgroundTasks):
     """AcRM is account registration model
@@ -90,9 +94,20 @@ async def acc_signup(acc_reg_model: AccountModel.AccountRegModel, back_task: Bac
     tmp = await SMa.post_acc_into_temp_db(temp_acc_model=acc_reg_model)
     if tmp is not None:
         if tmp == "ka":
-            raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTR DATA ERROR'})
+            raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTER DATA ERROR'})
         back_task.add_task(send_verify_email, tmp[0], tmp[1])
         return {"status": "REGISTERED"}
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTER ERROR'})
+
+
+@account_app.post('/orderemail')
+async def order_email(order_model: OrderEmailModel, back_task: BackgroundTasks):
+    """AcRM is account registration model
+    REGISTRATION API"""
+    tmp = SMa.order_email(order_model=order_model)
+    if tmp:
+        back_task.add_task(send_order_email_, order_model.acc_email, order_model)
+        return "grancvac"
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'REGISTR ERROR'})
 
 
@@ -102,7 +117,7 @@ async def acc_verify(token_verify: str, data: str):
     temp_ = SMa.verify_link(verify_token=token_verify)
     if temp_ is not None:
         if SMa.send_unique_code_and_pass(acc_unique_id=temp_[0], acc_email=temp_[1]):
-            redirect_page = RedirectResponse("http://pcassa.ru/")
+            redirect_page = RedirectResponse("https://pcassa.ru/")
             return redirect_page
         #add html page for errors
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'VERIFY ERROR'})
@@ -162,7 +177,7 @@ async def signin_acc(acc_sign_model: OAuth2PasswordRequestForm = Depends()):
 
 @account_app.post(APIRoutes.acc_refresh_token)
 def check_and_send_new_token(
-                       refresh_token: str,
+                       refresh_token: Refresh,
                        callback_after_successful_cheking: BackgroundTasks,
                        access_token: OAuth2PasswordBearer = Depends(get_current_user),
                        ):
@@ -170,7 +185,7 @@ def check_and_send_new_token(
        THIS REFRESH ALL TOKENS AND SEND NEW"""
     try:
         #decode refresh token and get all information about client
-        refresh_decoded_dict = jwt.decode(refresh_token,
+        refresh_decoded_dict = jwt.decode(refresh_token.refresh_token,
                                   JWTParamas.REFRESH_SECRET_KEY,
                                   JWTParamas.ALGORITHM)
         refresh_info = TokenPayload(**refresh_decoded_dict)
@@ -180,7 +195,7 @@ def check_and_send_new_token(
         #check time of refresh_token
         if now_ < refresh_timeout:
             if SMa.check_refresh_token(client_id=refresh_id,
-                                       client_refresh_token=refresh_token):
+                                       client_refresh_token=refresh_token.refresh_token):
                 access_token_ = create_access_token(refresh_id)
                 refresh_token_ = create_refresh_token(refresh_id)
                 #update db with new token
@@ -210,6 +225,7 @@ async def signin_acc_info(language: Language, access_token: OAuth2PasswordBearer
 @account_app.get('/links')
 async def get_links(access_token: OAuth2PasswordBearer = Depends(get_current_user)):
     info_ = SMa.get_links()
+    print(info_)
     if info_ is not None:
         return info_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'ERROR'})

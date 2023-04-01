@@ -7,18 +7,25 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from email import encoders
-
+from email.utils import formataddr
 
 def send_mail(send_to,order_id,subject='DOWNLOAD EXCEL',text='DOWNLOAD EXCEL',isTls=True):
     try:
         print(os.getcwd())
-        sender_from = 'testauthor96@mail.ru'
-        password = 'DdTqUhyXiJ6FmMEZCVJN'
-        receiver_add = send_to
+        #sender_email = 'account@pcassa.ru'
+        #password = 'j_kgtZdp3N-#'
+        #receiver_add = receiver_email
+        #smtp_server = smtplib.SMTP_SSL("mail.pcassa.ru", 465)
+        #smtp_server.starttls()  # setting up to TLS connection
+        ##############
+        sender_email = 'pcassa.manager@mail.ru'
+        password = '9izMrHQdREq0PkBZtXyi'
+        receiver_add = receiver_email
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
-        smtp_server.starttls()  # setting up to TLS connection
+        smtp_server.starttls() #setting up to TLS connection
+        ##############
         msg = MIMEMultipart()
-        msg['From'] = sender_from
+        msg['From'] = formataddr(("PCASSA MANAGER", sender_email))
         msg['To'] = send_to
         msg['Date'] = formatdate(localtime = True)
         msg['Subject'] = subject

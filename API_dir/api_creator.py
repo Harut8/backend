@@ -9,15 +9,17 @@ from configparser import ConfigParser
 from SERVICE_dir.serivce_manipulator_account import ServiceManipulatorACCOUNT as SMa
 from DB_dir.db_connection import DatabaseConnection
 
-
 conf = ConfigParser()
 conf.read('API_dir/API_CONFIG.ini')
 host = conf.get('API', 'host')
+email_ = conf.get('API', 'email')
+email_pass = conf.get('API', 'email_pass')
+# main_app = FastAPI(docs_url=None, redoc_url=None)
 main_app = FastAPI()
-main_app.include_router(account_app)
-main_app.include_router(tarif_app)
-main_app.include_router(admin_app)
-main_app.include_router(license_app)
+main_app.include_router(account_app)  # import account microservice
+main_app.include_router(tarif_app)  # import tariff microservice
+main_app.include_router(admin_app)  # import admin microservice
+main_app.include_router(license_app)  # import license microservice
 
 origins = ["*"]
 
@@ -46,17 +48,12 @@ def end_api_background_tasks():
 @main_app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     x = request.query_params
-    #print(await request.body())
-    #print(await request.body())
+    # print(await request.body())
     response = await call_next(request)
     return response
 
 
 def start_server():
     """Start server"""
-    run(main_app, host=host)
+    run(main_app, host=host, port=8000)
 
-
-#192.168.3.250
-#'192.168.0.104'
-#192.168.3.203

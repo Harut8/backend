@@ -1,22 +1,37 @@
-from pydantic import BaseModel,validator
+import uuid
+
+from pydantic import BaseModel,validator, Field
 
 class InnerModelForTarif(BaseModel):
     """MODEL FOR INNER  CONTENT OF TARIF"""
 
     cassa_names: str = None
     cassa_counts: int = None
+    cassa_prices: int = None
     manager_names: str = None
     manager_counts: int = None
+    manager_prices: int = None
     web_names: str = None
     web_counts: int = None
+    web_prices: int = None
     mobile_cassa_names: str = None
     mobile_cassa_counts: int = None
+    mobile_prices: int = None
     tarifes_others: list[str] = None
 
 
+class CompanyZayavka(BaseModel):
+    fio: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    country: str | None = None
+    company_name: str | None = None
+    costumer_count: str | None = None
+    comments: str | None = None
+
 class TarifModelForView(BaseModel):
     """MODEL FOR TARIFES VIEW"""
-    tarif_id: int = None
+    tarif_id: str = None
     tarif_names: str = None
     tarif_month_prices: int = None
     inner_content: InnerModelForTarif = None
@@ -51,6 +66,7 @@ class PersonalTarifInfo(BaseModel):
     mobile_cass_count: int | None = None
     mobile_manager_count: int | None = None
     web_manager_count: int | None = None
+    
     tarif_month: int | None = 1
 
 
@@ -62,11 +78,12 @@ class PersonalTarifForView(PersonalTarifForClient):
 
 
 class TarifDetailsGet(BaseModel):
-    tarif_id: int = None
+    tarif_id: str = None
 
 
 class BuyTarifeByTransfer(BaseModel):
     order_summ: int
+    tarif_id: str = Field(default=None)
     cass_stantion_count: int
     mobile_cass_count: int
     mobile_manager_count: int

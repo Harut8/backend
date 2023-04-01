@@ -47,6 +47,7 @@ class DatabaseManipulatorADMIN:
 
     @staticmethod
     def verify_payment_of_client(order_id):
+        print(11)
         try:
             with DBConnection.create_cursor() as cursor:
                 cursor.execute("""
@@ -60,8 +61,10 @@ begin
                 concat(date_part('day',(select order_ending -order_date from saved_order_and_tarif where order_id=%(order_id_)s)), ' days')::interval
                 where c_t_tarif_id = (select tarif_id_fk from saved_order_and_tarif where order_id = %(order_id_)s);
 	else
-	DELETE FROM client_tarif where c_t_tarif_id = 1 and c_t_id = (select company_id from saved_order_and_tarif where order_id = %(order_id_)s);
-	DELETE FROM saved_order_and_tarif WHERE tarif_id_fk = 1 and company_id = (select company_id from saved_order_and_tarif where order_id = %(order_id_)s);
+	DELETE FROM client_tarif where c_t_tarif_id = '992112fb-1ed1-45f4-90d9-fabb0532069a'
+	 and c_t_id = (select company_id from saved_order_and_tarif where order_id = %(order_id_)s);
+	DELETE FROM saved_order_and_tarif WHERE tarif_id_fk = '992112fb-1ed1-45f4-90d9-fabb0532069a'
+	 and company_id = (select company_id from saved_order_and_tarif where order_id = %(order_id_)s);
 	update saved_order_and_tarif set order_state = true where order_id = %(order_id_)s;
                 INSERT INTO client_tarif(c_t_id, c_t_tarif_id, end_license)
                 select company_id,
@@ -73,7 +76,7 @@ end if;
 end;
 $$
 
-                """, {"order_id_": int(order_id)})
+                """, {"order_id_": order_id})
                 DBConnection.commit()
                 return True
         except Exception as e:
@@ -86,7 +89,7 @@ $$
             with DBConnection.create_cursor() as cursor:
                 cursor.execute("select c_email from company where c_id = "
                                "(SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)",
-                               {"order_id": int(order_id)})
+                               {"order_id": order_id})
                 return cursor.fetchone()
         except Exception as e:
             print(e)
