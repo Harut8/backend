@@ -33,9 +33,14 @@ class ServiceManipulatorACCOUNT:
     @staticmethod
     def get_links():
         try:
+            d = ("cass_stantion_name",
+                 "mobile_cass_name",
+                 "mobile_manager_name",
+                 "web_manager_name")
+
             info_ = DBManipulator.get_links()
             if info_ is not None:
-                return info_
+                return {i: j["product_link"] for i, j in zip(d, info_)}
             return
         except Exception as e:
             raise e
