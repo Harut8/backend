@@ -176,6 +176,7 @@ class ServiceManipulatorACCOUNT:
                                   message=f"Your unique code --- {acc_unique_id} ,"
                                           f" Your email --- {acc_email},"
                                           f" Your password --- {pass_for_sending}"):
+                print("email unique")
                 if DBManipulator.update_verify_status(acc_unique_id=int(acc_unique_id)):
                     return True
             return False

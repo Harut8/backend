@@ -102,7 +102,7 @@ async def acc_verify(token_verify: str, data: str):
     temp_ = SMa.verify_link(verify_token=token_verify)
     if temp_ is not None:
         if SMa.send_unique_code_and_pass(acc_unique_id=temp_[0], acc_email=temp_[1]):
-            redirect_page = RedirectResponse("http://pcassa.ru/")
+            redirect_page = RedirectResponse("https://pcassa.ru/")
             return redirect_page
         #add html page for errors
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'VERIFY ERROR'})

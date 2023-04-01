@@ -77,7 +77,7 @@ class DatabaseManipulatorTARIFES:
                     do 
                     $do$
                     declare 
-                    inn_info int;
+                    inn_info bigint;
                     begin
                     SELECT c_inn into inn_info from company where c_token = %(client_token)s;
                     if inn_info is null then 

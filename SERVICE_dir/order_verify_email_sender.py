@@ -2,12 +2,12 @@ import smtplib
 import urllib.parse
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
+from email.utils import formataddr
 
 def generate_url_for_verify_tarif(*, order_id_token: str):
     """ GENERATE URL FOR VERIFYING ACCOUNT"""
     from API_dir.api_creator import host
-    url = 'http://'+host+':8000/verifypayment/?'
+    url = 'https://armenia.pcassa.ru:443/verifypayment/?'
     params = {'client_token': order_id_token}
     return url + urllib.parse.urlencode(params)
 
@@ -15,15 +15,22 @@ def generate_url_for_verify_tarif(*, order_id_token: str):
 def send_order_verify_link_email(*, receiver_email: str, message: str):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
-        sender_email = 'testauthor96@mail.ru'
-        password = 'DdTqUhyXiJ6FmMEZCVJN'
+        #sender_email = 'account@pcassa.ru'
+        #password = 'j_kgtZdp3N-#'
+        #receiver_add = receiver_email
+        #smtp_server = smtplib.SMTP_SSL("mail.pcassa.ru", 465)
+        ##############
+        sender_email = 'pcassa.manager@mail.ru'
+        password = 'YfpzwLkLCBAaS1ndJpqi'
         receiver_add = receiver_email
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
+        smtp_server.starttls() #setting up to TLS connection
+        ##############
         msg = MIMEMultipart('alternative')
         msg['Subject'] = "VERIFY PCASSA TARIF"
-        msg['From'] = sender_email
+        msg['From'] = formataddr(("PCASSA MANAGER", sender_email))
         msg['To'] = receiver_email
-        smtp_server.starttls() #setting up to TLS connection
+        #smtp_server.starttls() #setting up to TLS connection
         smtp_server.login(sender_email, password) #logging into out email id
         text = "VERIFY PCASSA ACCOUNT"
         link_for_verify = u'<a href="{mes}">CLICK TO VERIFY YOUR PCASSA TARIF</a>'.format(mes=message)

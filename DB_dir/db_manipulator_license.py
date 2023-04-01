@@ -45,13 +45,16 @@ where
                 """, {'unique_id': add_info.unique_code,
                                 'product_id': add_info.product_id})
                 if cursor.fetchone()['state_of_license'] != True:
-                    cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s
+                    cursor.execute(""" select device_license_key from device_info di 
+                                    join licenses lc on lc.license_key = di.device_license_key
+                                    where device_code = %(device_code)s
                                     and device_code = (select device_code from uniqunes_product where device_code = %(device_code)s
-                                    and product_id = %(product_id)s)
-                                     """, {
-                        "device_code": add_info.device_code,
-                        'product_id': add_info.product_id
-                    })
+                                    and product_id = %(product_id)s and unique_id_cp =%(uni)s )
+                 """,{
+                    "device_code": add_info.device_code,
+                    'product_id': add_info.product_id,
+                    "uni": add_info.unique_code
+                })
                     juts_ = cursor.fetchone()
                     print(juts_)
                     if juts_ is not None:
@@ -62,12 +65,15 @@ where
                         return {"port": info_["port"], "ip": info_["ip_of_client"], "license_key": license_key_}
                     return
 
-                cursor.execute(""" select device_license_key from device_info where device_code = %(device_code)s
-                and device_code = (select device_code from uniqunes_product where device_code = %(device_code)s
-                and product_id = %(product_id)s)
+                cursor.execute(""" select device_license_key from device_info di 
+                                    join licenses lc on lc.license_key = di.device_license_key
+                                    where device_code = %(device_code)s
+                                    and device_code = (select device_code from uniqunes_product where device_code = %(device_code)s
+                                    and product_id = %(product_id)s and unique_id_cp =%(uni)s )
                  """,{
                     "device_code": add_info.device_code,
-                    'product_id': add_info.product_id
+                    'product_id': add_info.product_id,
+                    "uni": add_info.unique_code
                 })
                 juts_ = cursor.fetchone()
                 print(juts_)

@@ -7,18 +7,25 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from email import encoders
-
+from email.utils import formataddr
 
 def send_mail(send_to,order_id,subject='DOWNLOAD EXCEL',text='DOWNLOAD EXCEL',isTls=True):
     try:
         print(os.getcwd())
-        sender_from = 'testauthor96@mail.ru'
-        password = 'DdTqUhyXiJ6FmMEZCVJN'
+        #sender_email = 'account@pcassa.ru'
+        #password = 'j_kgtZdp3N-#'
+        #receiver_add = receiver_email
+        #smtp_server = smtplib.SMTP_SSL("mail.pcassa.ru", 465)
+        #smtp_server.starttls()  # setting up to TLS connection
+        ##############
+        sender_email = 'pcassa.manager@mail.ru'
+        password = 'YfpzwLkLCBAaS1ndJpqi'
         receiver_add = send_to
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
-        smtp_server.starttls()  # setting up to TLS connection
+        smtp_server.starttls() #setting up to TLS connection
+        ##############
         msg = MIMEMultipart()
-        msg['From'] = sender_from
+        msg['From'] = formataddr(("PCASSA MANAGER", sender_email))
         msg['To'] = send_to
         msg['Date'] = formatdate(localtime = True)
         msg['Subject'] = subject
@@ -33,8 +40,8 @@ def send_mail(send_to,order_id,subject='DOWNLOAD EXCEL',text='DOWNLOAD EXCEL',is
         smtp = smtplib.SMTP("smtp.mail.ru", 587)
         if isTls:
             smtp.starttls()
-        smtp.login(sender_from,password)
-        smtp.sendmail(sender_from, send_to, msg.as_string())
+        smtp.login(sender_email,password)
+        smtp.sendmail(sender_email, send_to, msg.as_string())
         smtp.quit()
         print("EXCEL SENDED")
         return True
