@@ -205,6 +205,14 @@ async def signin_acc_info(language: Language, access_token: OAuth2PasswordBearer
     if check_ is not None:
         return check_
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'SIGNIN ERROR'})
+
+
+@account_app.get('/links')
+async def get_links(access_token: OAuth2PasswordBearer = Depends(get_current_user)):
+    info_ = SMa.get_links()
+    if info_ is not None:
+        return info_
+    raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'ERROR'})
 """-------------END OF ACCOUNT API-s-----------------"""
 
 

@@ -31,6 +31,16 @@ class ServiceManipulatorACCOUNT:
             message=generated_link)
 
     @staticmethod
+    def get_links():
+        try:
+            info_ = DBManipulator.get_links()
+            if info_ is not None:
+                return info_
+            return
+        except Exception as e:
+            raise e
+
+    @staticmethod
     async def post_acc_into_temp_db(temp_acc_model: AccountRegModel):
         """ POST DATA TO temp db
             GET id for generating unique url for verifying

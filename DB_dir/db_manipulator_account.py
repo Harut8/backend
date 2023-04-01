@@ -102,6 +102,20 @@ class DatabaseManipulatorACCOUNT:
             return False
 
     @staticmethod
+    def get_links():
+        """GET ID FROM temp_db FOR ADDING TO COMPANY DB"""
+        try:
+            with DBConnection.create_cursor() as cursor:
+                SQL_query = f"""SELECT * FROM links"""
+                cursor.execute(SQL_query)
+                print('SUCCESSFULL GETTING NAME')
+                return cursor.fetchall()
+        except Exception as e:
+            print(e)
+            DBConnection.rollback()
+            return False
+
+    @staticmethod
     async def post_link_into_temp_company(*, link, name):
         """ AFTER ADDING User to temp_company
             generate link and update column"""
@@ -278,16 +292,16 @@ class DatabaseManipulatorACCOUNT:
                                 "lan_num": lan_num})
 
                 data2 = cursor.fetchall()
-                fk_data = []
-                for i in data2:
-                    cursor.execute(""" 
-                                    SELECT * from get_links_state((select order_id from saved_order_and_tarif where tarif_id_fk=%(t_id)s));
-                                    """, {'t_id': i['t_id']})
-                    #print(i, cursor.fetchall())
-                    fk_data += [i | {"links": cursor.fetchall()}]
+                # fk_data = []
+                # for i in data2:
+                #     cursor.execute("""
+                #                     SELECT * from get_links_state((select order_id from saved_order_and_tarif where tarif_id_fk=%(t_id)s));
+                #                     """, {'t_id': i['t_id']})
+                #     #print(i, cursor.fetchall())
+                #     fk_data += [i | {"links": cursor.fetchall()}]
                     #print(i, "----------------")
                 #print(fk_data)
-                data = data | {"tarif_list": fk_data}
+                data = data | {"tarif_list": data2}
                 if data is None:
                     SQL_query = """SELECT c_name, d_name FROM company c
                          LEFT JOIN diller d ON c.c_diller_id = d.d_id
