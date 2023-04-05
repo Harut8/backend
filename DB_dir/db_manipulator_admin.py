@@ -150,16 +150,25 @@ $$
             return
 
     @staticmethod
-    def get_comapnies():
+    def get_comapnies(admin_login):
         try:
             with DBConnection.create_cursor() as cursor:
                 cursor.execute(
                     """
                     with cte as (
-                    select c_unique_id,c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn,
-                    row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer
-                    from company c) select * from cte;
-                    """
+select 
+case 
+	when (select * from (select pt2.permission_id = 1 as tip from admin_table at2
+	join privilege_table pt on at2.admin_privilege = pt.privilege_id 
+	join permission_table pt2 on pt2.permission_id = pt.privilege_type 
+	where at2.admin_login=%(admin_login)s) s where tip in (true)) then c_unique_id
+	else 0
+end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn,
+row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer
+from company c)
+
+select * from cte;
+                    """,{'admin_login': admin_login}
                 )
                 info_ = cursor.fetchall()
                 return info_

@@ -91,9 +91,9 @@ class ServiceManipulatorADMIN:
                 return
 
     @staticmethod
-    def get_companies():
+    def get_companies(admin_login):
         dillers = DatabaseManipulatorADMIN.get_dillers()
-        companies = DatabaseManipulatorADMIN.get_comapnies()
+        companies = DatabaseManipulatorADMIN.get_comapnies(admin_login=admin_login)
         return_data = {i["d_id"]: [] for i in dillers}
         if companies:
             for i in companies:

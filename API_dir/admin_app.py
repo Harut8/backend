@@ -48,8 +48,8 @@ async def admin_get_payment_list(type_of_payment: PaymentListEnum):
 
 
 @admin_app.get('/admin/company')
-async def get_companies():
-    info_ = ServiceManipulatorADMIN.get_companies()
+async def get_companies(admin_login):
+    info_ = ServiceManipulatorADMIN.get_companies(admin_login=admin_login)
     if info_:
         return info_
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'ERROR'})
