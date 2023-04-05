@@ -161,7 +161,8 @@ $$
                 cursor.execute(
                     f"""
                     with cte as (
-                    select case 
+                    select c_id,
+                    case 
                     when (select * from (select pt2.permission_id = 1 as tip from admin_table at2
                         join privilege_table pt on at2.admin_privilege = pt.privilege_id 
                         join permission_table pt2 on pt2.permission_id = pt.privilege_type 
