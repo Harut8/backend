@@ -161,19 +161,18 @@ $$
                 cursor.execute(
                     f"""
                     with cte as (
-select 
-case 
-	when (select * from (select pt2.permission_id = 1 as tip from admin_table at2
-	join privilege_table pt on at2.admin_privilege = pt.privilege_id 
-	join permission_table pt2 on pt2.permission_id = pt.privilege_type 
-	where at2.admin_login=%(admin_login)s) s where tip in (true)) then c_unique_id
-	else 0
-end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn,
-row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer
-from company c)
-
-select * from cte where {search_from} like %(search)s;
-                    """,{'admin_login': admin_login, "search": '%'+search+'%'}
+                    select case 
+                    when (select * from (select pt2.permission_id = 1 as tip from admin_table at2
+                        join privilege_table pt on at2.admin_privilege = pt.privilege_id 
+                        join permission_table pt2 on pt2.permission_id = pt.privilege_type 
+                        where at2.admin_login=%(admin_login)s) s where tip in (true)) then c_unique_id
+                    else 0
+                    end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn,
+                    row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer from company c)
+                    select * from cte where {search_from} like %(search)s;
+                    """,
+                    {'admin_login': admin_login,
+                     "search": '%'+search+'%'}
                 )
                 info_ = cursor.fetchall()
                 return info_
