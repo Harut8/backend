@@ -150,11 +150,16 @@ $$
             return
 
     @staticmethod
-    def get_comapnies(admin_login, search):
+    def get_comapnies(admin_login, search:str):
         try:
+            if search.isdigit():
+                search_from = "c_inn"
+            else:
+                search_from = "c_name"
+            print(search_from)
             with DBConnection.create_cursor() as cursor:
                 cursor.execute(
-                    """
+                    f"""
                     with cte as (
 select 
 case 
@@ -167,7 +172,7 @@ end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn
 row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer
 from company c)
 
-select * from cte where c_name like %(search)s;
+select * from cte where {search_from} like %(search)s;
                     """,{'admin_login': admin_login, "search": '%'+search+'%'}
                 )
                 info_ = cursor.fetchall()
