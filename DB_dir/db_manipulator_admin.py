@@ -150,7 +150,7 @@ $$
             return
 
     @staticmethod
-    def get_comapnies(admin_login):
+    def get_comapnies(admin_login, search):
         try:
             with DBConnection.create_cursor() as cursor:
                 cursor.execute(
@@ -167,8 +167,8 @@ end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn
 row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer
 from company c)
 
-select * from cte;
-                    """,{'admin_login': admin_login}
+select * from cte where c_name like %(search)s;
+                    """,{'admin_login': admin_login, "search": '%'+search+'%'}
                 )
                 info_ = cursor.fetchall()
                 return info_
