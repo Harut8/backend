@@ -53,3 +53,18 @@ async def get_companies(admin_login, q):
     if info_:
         return info_
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'ERROR'})
+
+
+@admin_app.get('/admin/company/{company_id}')
+async def get_company_and_tarif(company_id: int):
+    info_ = ServiceManipulatorADMIN.get_company_and_tarif_by_id(company_id)
+    if info_:
+        return info_
+    raise HTTPException(status_code=400, detail='ERROR', headers={'status': 'ERROR'})
+
+
+@admin_app.post('/admin/company/tarif/{order_id}')
+async def block_tarif_for_company(order_id: int):
+    if ServiceManipulatorADMIN.block_tarif_for_company(order_id, 'jj'):
+        return {"status": "ok"}
+    raise HTTPException(status_code=400, detail='ERROR', headers={'status': 'ERROR'})

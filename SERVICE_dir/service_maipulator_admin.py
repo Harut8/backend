@@ -102,3 +102,15 @@ class ServiceManipulatorADMIN:
                 return_data[i["d_name"]] = return_data.pop(i["d_id"])
 
         return return_data
+
+    @staticmethod
+    def get_company_and_tarif_by_id(company_id):
+        info_ = DatabaseManipulatorADMIN.get_company_and_tarif_by_id(company_id)
+        if info_:
+            return info_
+
+    @staticmethod
+    def block_tarif_for_company(order_id, admin_login):
+        if DatabaseManipulatorADMIN.block_tarif_for_company(order_id, admin_login):
+            return 1
+

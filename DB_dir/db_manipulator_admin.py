@@ -161,13 +161,14 @@ $$
                 cursor.execute(
                     f"""
                     with cte as (
-                    select case 
+                    select c_id,
+                    case 
                     when (select * from (select pt2.permission_id = 1 as tip from admin_table at2
                         join privilege_table pt on at2.admin_privilege = pt.privilege_id 
                         join permission_table pt2 on pt2.permission_id = pt.privilege_type 
                         where at2.admin_login=%(admin_login)s) s where tip in (true)) then c_unique_id
                     else 0
-                    end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn,
+                    end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn, c_address
                     row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer from company c)
                     select * from cte where {search_from} like %(search)s;
                     """,
@@ -179,5 +180,47 @@ $$
         except Exception as e:
             print(e)
             return
+
+    @staticmethod
+    def get_company_and_tarif_by_id(company_id):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""
+                select distinct soat.order_id, soat.order_summ, soat.order_date pay_date,
+soat.cass_stantion_count, soat.mobile_cass_count, soat.mobile_manager_count, soat .web_manager_count,
+(select curr_name from curr_types where curr_id = soat.order_curr_type) as curr_type,
+case 
+	when soat.order_state then (select ct.start_license from client_tarif ct where ct.c_t_id = soat.company_id and ct.c_t_tarif_id = soat.tarif_id_fk )
+	else null 
+end start_license,
+case 
+	when soat.order_state then (select ct.end_license from client_tarif ct where ct.c_t_id = soat.company_id and ct.c_t_tarif_id = soat.tarif_id_fk )
+	else null
+end end_license
+from saved_order_and_tarif soat
+left join client_tarif ct on ct.c_t_id = soat.company_id 
+where soat.company_id = %(comp_id)s
+                """, {
+                    'comp_id': company_id
+                })
+                return cursor.fetchall()
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def block_tarif_for_company(order_id, admin_login):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""select * from check_permission(%(admin_login)s)""", {
+                    'admin_login': admin_login
+                })
+                if not cursor.fetchone()["check_permission"]:
+                    return
+                cursor.execute("""
+                UPDATE saved_order_and_tarif set order_state = false where order_id = %(order_id)s;
+                """, {"order_id": order_id})
+                return 1
+        except Exception as e:
+            raise e
 
 
