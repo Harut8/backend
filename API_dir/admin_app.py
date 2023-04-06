@@ -1,11 +1,65 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from datetime import datetime, timezone, timedelta
+
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt
+from starlette import status
 from starlette.responses import RedirectResponse
+
+from SERVICE_dir.jwt_logic import JWTParamas, TokenPayload, create_access_token, create_refresh_token
 from .api_routes import APIRoutes
 from MODELS_dir.admin_model import PaymentListEnum
 from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
 admin_app = APIRouter(tags=["ADMIN PANEL FUNCTIONAL"])
 from SERVICE_dir.order_verify_email_sender import send_order_verify_link_email, generate_url_for_verify_tarif
 from SERVICE_dir.links_for_download_send import send_download_links
+
+
+admin_oauth = OAuth2PasswordBearer(
+        tokenUrl="/admin/signin",
+        scheme_name="JWT"
+    )
+
+
+async def get_admin_login(token: str = Depends(admin_oauth)):
+    """CHECK INVALID TOKENS
+       CHECK EXPIRED TOKENS"""
+    try:
+        payload = jwt.decode(
+            token, JWTParamas.ACCESS_SECRET_KEY, algorithms=[JWTParamas.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+        print(token_data)
+        if token_data.exp < datetime.utcnow().replace(tzinfo=timezone.utc):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="ERROR",
+                headers={"WWW-Authenticate": "EXPIRED TIME"},
+            )
+        return token_data.sub
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="ERROR",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@admin_app.post('/admin/signin')
+async def signin(admin_sign_model: OAuth2PasswordRequestForm = Depends()):
+    check_ = ServiceManipulatorADMIN.signin_admin(
+        admin_login=admin_sign_model.username,
+        admin_password=admin_sign_model.password)
+    print(check_)
+    if check_:
+        ACCESS_TOKEN = create_access_token(check_["admin_login"], expires_delta=timedelta(hours=10))
+        REFRESH_TOKEN = create_refresh_token(check_["admin_login"], expires_delta=timedelta(hours=10))
+        return {
+            "access_token": ACCESS_TOKEN,
+            "refresh_token": REFRESH_TOKEN
+        }
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="ERROR")
 
 
 def send_link_for_download(order_id_token, email_):
@@ -64,7 +118,7 @@ async def get_company_and_tarif(company_id: int):
 
 
 @admin_app.post('/admin/company/tarif/{order_id}')
-async def block_tarif_for_company(order_id: int):
-    if ServiceManipulatorADMIN.block_tarif_for_company(order_id, 'jj'):
+async def block_tarif_for_company(order_id: int, admin_login=Depends(get_admin_login)):
+    if ServiceManipulatorADMIN.block_tarif_for_company(order_id, admin_login.replace(JWTParamas.SOLD_KEY, '')):
         return {"status": "ok"}
     raise HTTPException(status_code=400, detail='ERROR', headers={'status': 'ERROR'})

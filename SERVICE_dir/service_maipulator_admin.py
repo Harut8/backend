@@ -1,5 +1,5 @@
+import hashlib
 from datetime import datetime, timezone
-
 from MODELS_dir.admin_model import PaymentListEnum, PaymentListView
 from DB_dir.db_manipulator_admin import DatabaseManipulatorADMIN
 from .admin_client_secure import encode_client_id_for_url, decode_client_id_for_verify
@@ -113,4 +113,13 @@ class ServiceManipulatorADMIN:
     def block_tarif_for_company(order_id, admin_login):
         if DatabaseManipulatorADMIN.block_tarif_for_company(order_id, admin_login):
             return 1
+
+    @staticmethod
+    def signin_admin(admin_login, admin_password):
+        acc_pass = hashlib.sha256(admin_password.encode()).hexdigest().upper()
+        info_ = DatabaseManipulatorADMIN.signin_admin(admin_login, acc_pass)
+        if info_:
+            return info_
+        return
+
 

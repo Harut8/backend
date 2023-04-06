@@ -214,12 +214,27 @@ where soat.company_id = %(comp_id)s
                 cursor.execute("""select * from check_permission(%(admin_login)s)""", {
                     'admin_login': admin_login
                 })
-                if not cursor.fetchone()["check_permission"]:
+                if cursor.fetchone()["check_permission"] != 1:
                     return
                 cursor.execute("""
                 UPDATE saved_order_and_tarif set order_state = false where order_id = %(order_id)s;
                 """, {"order_id": order_id})
                 return 1
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def signin_admin(admin_login, admin_password):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""
+                select at2.admin_login, at2.admin_name, at2.admin_privilege  from admin_table at2 
+                where at2.admin_login = %(admin_login)s and at2.admin_password = %(admin_password)s;
+                """, {
+                    'admin_login': admin_login,
+                    'admin_password': admin_password
+                })
+                return cursor.fetchone()
         except Exception as e:
             raise e
 
