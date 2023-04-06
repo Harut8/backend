@@ -168,7 +168,7 @@ $$
                         join permission_table pt2 on pt2.permission_id = pt.privilege_type 
                         where at2.admin_login=%(admin_login)s) s where tip in (true)) then c_unique_id
                     else 0
-                    end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn, c_address
+                    end as c_unique_id, c_diller_id, c_name, c_contact_name, c_phone, c_email, c_inn, c_address,
                     row_number () over(partition by c.c_diller_id order by c.c_diller_id) as numer from company c)
                     select * from cte where {search_from} like %(search)s;
                     """,
@@ -219,6 +219,19 @@ where soat.company_id = %(comp_id)s
                 cursor.execute("""
                 UPDATE saved_order_and_tarif set order_state = false where order_id = %(order_id)s;
                 """, {"order_id": order_id})
+                return 1
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def check_permission(admin_login):
+        try:
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""select * from check_permission(%(admin_login)s)""", {
+                    'admin_login': admin_login
+                })
+                if cursor.fetchone()["check_permission"] != 1:
+                    return
                 return 1
         except Exception as e:
             raise e

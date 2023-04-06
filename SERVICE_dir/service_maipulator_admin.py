@@ -35,6 +35,11 @@ class ServiceManipulatorADMIN:
             return info_['c_email']
         return
 
+    @staticmethod
+    def check_permission(admin_login):
+        if DatabaseManipulatorADMIN.check_permission(admin_login):
+            return True
+
     @classmethod
     def __create_list_of_payment(cls, info_):
         return [

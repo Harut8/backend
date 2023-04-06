@@ -85,16 +85,19 @@ async def client_verify_payment_link(client_token: str, send_link: BackgroundTas
 
 
 @admin_app.post(APIRoutes.verifyorder)
-async def send_link_for_verify_payment(client_token: str, back_task: BackgroundTasks):
-    info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
-    if info_:
-        back_task.add_task(send_verify_link_to_client, info_, client_token)
-        return {"status": "ok", "message": "VERIFY LINK SENDED"}
+async def send_link_for_verify_payment(client_token: str,
+                                       back_task: BackgroundTasks,
+                                       admin_login=Depends(get_admin_login)):
+    if ServiceManipulatorADMIN.check_permission(admin_login.replace(JWTParamas.SOLD_KEY, '')):
+        info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
+        if info_:
+            back_task.add_task(send_verify_link_to_client, info_, client_token)
+            return {"status": "ok", "message": "VERIFY LINK SENDED"}
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'SEND EMAIL ERROR'})
 
 
 @admin_app.get(APIRoutes.getpaymentlist)
-async def admin_get_payment_list(type_of_payment: PaymentListEnum):
+async def admin_get_payment_list(type_of_payment: PaymentListEnum, admin_login=Depends(get_admin_login)):
     info_ = ServiceManipulatorADMIN.get_payment_list(type_of_payment)
     if info_ is not None:
         return info_
@@ -102,15 +105,17 @@ async def admin_get_payment_list(type_of_payment: PaymentListEnum):
 
 
 @admin_app.get('/admin/company')
-async def get_companies(admin_login, q):
-    info_ = ServiceManipulatorADMIN.get_companies(admin_login=admin_login, search=q)
+async def get_companies(q='', admin_login=Depends(get_admin_login)):
+    info_ = ServiceManipulatorADMIN.get_companies(
+        admin_login=admin_login.replace(JWTParamas.SOLD_KEY, ''),
+        search=q)
     if info_:
         return info_
     raise HTTPException(status_code=404, detail='ERROR', headers={'status': 'ERROR'})
 
 
 @admin_app.get('/admin/company/{company_id}')
-async def get_company_and_tarif(company_id: int):
+async def get_company_and_tarif(company_id: int, admin_login=Depends(get_admin_login)):
     info_ = ServiceManipulatorADMIN.get_company_and_tarif_by_id(company_id)
     if info_:
         return info_
