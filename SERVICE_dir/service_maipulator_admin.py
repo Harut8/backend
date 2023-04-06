@@ -111,8 +111,9 @@ class ServiceManipulatorADMIN:
     @staticmethod
     def get_company_and_tarif_by_id(company_id):
         info_ = DatabaseManipulatorADMIN.get_company_and_tarif_by_id(company_id)
-        if info_:
-            return info_
+        info_2 = DatabaseManipulatorADMIN.get_used_device_count(company_id)
+        if info_ and info_2:
+            return {"tarifes": info_, "used_device": info_2}
 
     @staticmethod
     def block_tarif_for_company(order_id, admin_login):

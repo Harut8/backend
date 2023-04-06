@@ -251,4 +251,28 @@ where soat.company_id = %(comp_id)s
         except Exception as e:
             raise e
 
+    @staticmethod
+    def get_used_device_count(company_id):
+        try:
+            product_id_table = {
+                1: 'cass_stantion_count',
+                2: 'mobile_cass_count',
+                3: 'web_manager_count',
+                4: 'mobile_manager_count'
+            }
+            with DBConnection.create_cursor() as cursor:
+                cursor.execute("""
+                with cte2 as (
+                select count(*), l.product_id_fk  from licenses l
+                where l.unique_id_cp = (select c.c_unique_id  from company c where c.c_id = %(comp_id)s)
+                group by l.product_id_fk order by l.product_id_fk )
+                select * from cte2;
+                """, {
+                    'comp_id': company_id
+                })
+                #print(cursor.fetchone())
+                return [{product_id_table[i["product_id_fk"]]:i["count"]} for i in cursor.fetchall()]
+        except Exception as e:
+            raise e
+
 
