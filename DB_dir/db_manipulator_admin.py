@@ -4,12 +4,12 @@ from .db_connection import DatabaseConnection as DBConnection
 class DatabaseManipulatorADMIN:
 
     @staticmethod
-    def get_payments_for_view(*, order_state: bool, order_curr_type: tuple):
+    def get_payments_for_view(*, order_state: tuple[bool], order_curr_type: tuple):
         try:
             with DBConnection.create_cursor() as connection:
                 connection.execute("""
                 select order_id,
-                       
+                c_name, c_contact_name, c_phone, c_email, c_inn, c_address,
                        order_summ,
                        cass_stantion_count,
                        mobile_cass_count,
@@ -17,9 +17,11 @@ class DatabaseManipulatorADMIN:
                        web_manager_count,
                        order_curr_type,
                        order_date,
-                       order_ending 
+                       order_ending,
+                       order_state 
                 from saved_order_and_tarif soat 
-                where order_state = %(order_state)s 
+                join company cp on cp.c_id = soat.company_id
+                where order_state in %(order_state)s 
                 and order_curr_type in  %(order_curr_type)s
                 order by order_date desc
                 """, {

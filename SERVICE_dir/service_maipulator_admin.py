@@ -53,6 +53,12 @@ class ServiceManipulatorADMIN:
                 order_curr_type=i["order_curr_type"],
                 order_date=i["order_date"],
                 order_ending=i["order_ending"],
+                c_name=i["c_name"],
+                c_contact_name=i["c_contact_name"],
+                c_phone=i["c_phone"],
+                c_email=i["c_email"],
+                c_inn=i["c_inn"],
+                c_address=i["c_address"],
             )
             for i in info_
         ]
@@ -62,7 +68,7 @@ class ServiceManipulatorADMIN:
         match type_of_payment:
             case type_of_payment.typetransferbuyed:
                 info_ = DatabaseManipulatorADMIN.get_payments_for_view(
-                    order_state=True,
+                    order_state=(True, False),
                     order_curr_type=(0,)
                 )
                 if info_ is not None:
@@ -70,7 +76,7 @@ class ServiceManipulatorADMIN:
                 return
             case type_of_payment.typecardbuyed:
                 info_ = DatabaseManipulatorADMIN.get_payments_for_view(
-                    order_state=True,
+                    order_state=(True, False),
                     order_curr_type=(1,)
                 )
                 if info_ is not None:
@@ -78,7 +84,7 @@ class ServiceManipulatorADMIN:
                 return
             case type_of_payment.typeinorder:
                 info_ = DatabaseManipulatorADMIN.get_payments_for_view(
-                    order_state=False,
+                    order_state=(False,),
                     order_curr_type=(0, 1)
                 )
                 if info_ is not None:
@@ -86,8 +92,8 @@ class ServiceManipulatorADMIN:
                 return
             case type_of_payment.typeall:
                 info_ = DatabaseManipulatorADMIN.get_payments_for_view(
-                    order_state=True,
-                    order_curr_type=(0, 1)
+                    order_state=(True, False),
+                    order_curr_type=(0, 1, 2)
                 )
                 if info_ is not None:
                     return ServiceManipulatorADMIN.__create_list_of_payment(info_)

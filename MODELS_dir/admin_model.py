@@ -20,6 +20,12 @@ class PaymentListView(BaseModel):
     order_curr_type: int
     order_date: datetime
     order_ending: datetime
+    c_name: str
+    c_contact_name: str
+    c_phone: str
+    c_email: str
+    c_inn: str
+    c_address: str
 
     @validator('order_date', 'order_ending')
     def order_date_checker(cls, arg: datetime, **kwargs):
