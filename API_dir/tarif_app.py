@@ -3,9 +3,9 @@ from fastapi import HTTPException, status, Depends, APIRouter, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from SERVICE_dir.admin_client_secure import encode_client_id_for_url
-#from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
+from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
 from .account_app import get_current_user
-#from .admin_app import send_verify_link_to_client
+from .admin_app import send_verify_link_to_client
 from .api_routes import APIRoutes
 from MODELS_dir.acc_model import Language
 from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient, PersonalTarifInfo, BuyTarifeByTransfer, TarifDetailsGet)
@@ -99,7 +99,7 @@ async def buy_tarife_by_card(
         client_token = encode_client_id_for_url(state_of_buy["order_id"])
         info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token)
         if info_:
-            back_task.add_task(send_verify_link_to_client, info_, client_token)
+            #back_task.add_task(send_verify_link_to_client, info_, client_token)
             return {"status": "ok", "message": "VERIFY LINK SENDED"}
         return {"status": "ok"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})

@@ -4,7 +4,7 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt
 
-from MODELS_dir.acc_model import Language
+from MODELS_dir.acc_model import Language, Refresh
 from SERVICE_dir.jwt_logic import JWTParamas, create_access_token, create_refresh_token, TokenPayload
 from .api_routes import APIRoutes
 from MODELS_dir import acc_model as AccountModel
@@ -21,7 +21,7 @@ account_app = APIRouter(tags=["ACCOUNT FUNCTIONALITY"])
     #################################
 """
 reuseable_oauth = OAuth2PasswordBearer(
-    tokenUrl="/signin",
+    tokenUrl="/signin/",
     scheme_name="JWT"
 )
 
@@ -162,7 +162,7 @@ async def signin_acc(acc_sign_model: OAuth2PasswordRequestForm = Depends()):
 
 @account_app.post(APIRoutes.acc_refresh_token)
 def check_and_send_new_token(
-                       refresh_token: str,
+                       refresh_token: Refresh,
                        callback_after_successful_cheking: BackgroundTasks,
                        access_token: OAuth2PasswordBearer = Depends(get_current_user),
                        ):
@@ -170,7 +170,7 @@ def check_and_send_new_token(
        THIS REFRESH ALL TOKENS AND SEND NEW"""
     try:
         #decode refresh token and get all information about client
-        refresh_decoded_dict = jwt.decode(refresh_token,
+        refresh_decoded_dict = jwt.decode(refresh_token.refresh_token,
                                   JWTParamas.REFRESH_SECRET_KEY,
                                   JWTParamas.ALGORITHM)
         refresh_info = TokenPayload(**refresh_decoded_dict)
@@ -180,7 +180,7 @@ def check_and_send_new_token(
         #check time of refresh_token
         if now_ < refresh_timeout:
             if SMa.check_refresh_token(client_id=refresh_id,
-                                       client_refresh_token=refresh_token):
+                                       client_refresh_token=refresh_token.refresh_token):
                 access_token_ = create_access_token(refresh_id)
                 refresh_token_ = create_refresh_token(refresh_id)
                 #update db with new token

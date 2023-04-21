@@ -62,9 +62,10 @@ class ServiceManipulatorTARIFES:
             item: BuyTarifeByTransfer,
             valute: int):
         try:
-
+            print(item.tarif_id)
             temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_order(
                 order_summ=item.order_summ,
+                tarif_id=item.tarif_id,
                 cass_stantion_count=item.cass_stantion_count,
                 mobile_cass_count=item.mobile_cass_count,
                 mobile_manager_count=item.mobile_manager_count,

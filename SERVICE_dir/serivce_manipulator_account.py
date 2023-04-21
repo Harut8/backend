@@ -35,8 +35,9 @@ class ServiceManipulatorACCOUNT:
         try:
             d = ("cass_stantion_name",
                  "mobile_cass_name",
+                 "web_manager_name",
                  "mobile_manager_name",
-                 "web_manager_name")
+                 )
 
             info_ = DBManipulator.get_links()
             if info_ is not None:
@@ -157,6 +158,7 @@ class ServiceManipulatorACCOUNT:
             return AccountViewModel(
                 c_id=tmp_["c_id"],
                 c_name=tmp_["c_name"],
+                c_unique_id=tmp_["c_unique_id"],
                 c_contact_name=tmp_["c_contact_name"],
                 c_phone=tmp_["c_phone"],
                 c_email=tmp_["c_email"],

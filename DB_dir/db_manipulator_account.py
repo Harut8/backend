@@ -38,6 +38,7 @@ class DatabaseManipulatorACCOUNT:
                 SQL_query = f"""
                                     INSERT INTO temp_company(
                                     t_c_name,
+                                    t_c_country,
                                     t_c_pass,
                                     t_c_contact_name,
                                     t_c_phone,
@@ -53,6 +54,7 @@ class DatabaseManipulatorACCOUNT:
                                     )
                                     VALUES (
                                     %(org_name)s,
+                                    %(t_c_country)s,
                                     '{hash_pass}',
                                     %(contact_name)s,
                                     %(acc_phone)s,
@@ -68,6 +70,7 @@ class DatabaseManipulatorACCOUNT:
                                     """
                 cursor.execute(SQL_query, {
                     'org_name': item.acc_org_name,
+                    't_c_country': item.acc_country,
                     'contact_name': item.acc_contact_name,
                     'acc_phone': item.acc_phone,
                     'acc_email': item.acc_email,
@@ -106,7 +109,7 @@ class DatabaseManipulatorACCOUNT:
         """GET ID FROM temp_db FOR ADDING TO COMPANY DB"""
         try:
             with DBConnection.create_cursor() as cursor:
-                SQL_query = f"""SELECT * FROM links"""
+                SQL_query = f"""SELECT * FROM links order by product_id"""
                 cursor.execute(SQL_query)
                 print('SUCCESSFULL GETTING NAME')
                 return cursor.fetchall()
@@ -261,6 +264,7 @@ class DatabaseManipulatorACCOUNT:
         try:
             with DBConnection.create_cursor() as cursor:
                 SQL_query = """SELECT c_id,
+                                      c_unique_id,
                                       c_name,
                                       c_contact_name,
                                       c_phone,
@@ -277,7 +281,7 @@ class DatabaseManipulatorACCOUNT:
                       true as order_state
                 FROM tarif 
                 join client_tarif ct on ct.c_t_id = %(client_id)s and ct.c_t_tarif_id  = t_id
-                where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s)
+                where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s and for_view = true)
                 union all
                 SELECT 
                       distinct t_id,
@@ -286,6 +290,7 @@ class DatabaseManipulatorACCOUNT:
                       false as order_state
                 FROM tarif 
                 where t_id in (select tarif_id_fk from saved_order_and_tarif soat where company_id = %(client_id)s
+                and for_view = true
                 except select c_t_tarif_id  from client_tarif ct2  where c_t_id  = %(client_id)s)
                                """,
                                {"client_id": data['c_id'],

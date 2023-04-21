@@ -1,4 +1,5 @@
-from pydantic import BaseModel,validator
+from pydantic import BaseModel, validator, Field
+
 
 class InnerModelForTarif(BaseModel):
     """MODEL FOR INNER  CONTENT OF TARIF"""
@@ -67,6 +68,7 @@ class TarifDetailsGet(BaseModel):
 
 class BuyTarifeByTransfer(BaseModel):
     order_summ: int
+    tarif_id: int = Field(default=None)
     cass_stantion_count: int
     mobile_cass_count: int
     mobile_manager_count: int
