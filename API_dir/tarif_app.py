@@ -3,9 +3,9 @@ from fastapi import HTTPException, status, Depends, APIRouter, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from SERVICE_dir.admin_client_secure import encode_client_id_for_url
-#from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
+from SERVICE_dir.service_maipulator_admin import ServiceManipulatorADMIN
 from .account_app import get_current_user
-#from .admin_app import send_verify_link_to_client
+from .admin_app import send_verify_link_to_client
 from .api_routes import APIRoutes
 from MODELS_dir.acc_model import Language
 from MODELS_dir.tarif_model import (TarifToClient, PersonalTarifForClient, PersonalTarifInfo, BuyTarifeByTransfer, TarifDetailsGet)
