@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from .account_app import account_app
 from .tarif_app import tarif_app
-from .admin_app import admin_app
+#from .admin_app import admin_app
 from .license_app import license_app
 from uvicorn import run
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,11 +13,11 @@ from DB_dir.db_connection import DatabaseConnection
 conf = ConfigParser()
 conf.read('API_dir/API_CONFIG.ini')
 host = conf.get('API', 'host')
-main_app = FastAPI(docs_url=None, redoc_url=None)
-#main_app = FastAPI()
+#main_app = FastAPI(docs_url=None, redoc_url=None)
+main_app = FastAPI()
 main_app.include_router(account_app)
 main_app.include_router(tarif_app)
-main_app.include_router(admin_app)
+#main_app.include_router(admin_app)
 main_app.include_router(license_app)
 
 origins = ["*"]
