@@ -59,10 +59,13 @@ where
                     print(juts_)
                     if juts_ is not None:
                         license_key_ = juts_['device_license_key']
-                        cursor.execute("""select port, ip_of_client from device_port where unique_id_cp = %(uni)s """,
-                                       {"uni": add_info.unique_code})
+                        cursor.execute("""select port, own_ip from device_port dp, licenses
+                                                              where license_key = %(lc_key)s
+                                                              and dp.unique_id_cp = %(uni)s""",
+                                       {"uni": add_info.unique_code,
+                                        "lc_key": license_key_})
                         info_ = cursor.fetchone()
-                        return {"port": info_["port"], "ip": info_["ip_of_client"], "license_key": license_key_}
+                        return {"port": info_["port"], "ip": info_["own_ip"], "license_key": license_key_}
                     return
 
                 cursor.execute(""" select device_license_key from device_info di 
@@ -79,10 +82,15 @@ where
                 print(juts_)
                 if juts_ is not None:
                     license_key_ = juts_['device_license_key']
-                    cursor.execute("""select port, ip_of_client from device_port where unique_id_cp = %(uni)s """,
-                                   {"uni": add_info.unique_code})
+                    print(license_key_)
+                    cursor.execute("""select port, own_ip from device_port dp, licenses
+                                      where license_key = %(lc_key)s
+                                      and dp.unique_id_cp = %(uni)s""",
+                                   {"uni": add_info.unique_code,
+                                    "lc_key": license_key_})
                     info_ = cursor.fetchone()
-                    return {"port": info_["port"], "ip": info_["ip_of_client"], "license_key": license_key_}
+                    print(111111111, info_)
+                    return {"port": info_["port"], "ip": info_["own_ip"], "license_key": license_key_}
                 cursor.execute(""" insert into uniqunes_product(device_code, product_id)
                                    VALUES(%(device_code)s, %(product_id_fk)s);
                                    insert into licenses(license_key, product_id_fk, unique_id_cp)
@@ -108,7 +116,13 @@ where
                 port_ = port_ip["port"]
                 ip_ = port_ip["ip_of_client"]
                 DBConnection.commit()
-                return {'port': port_} | {'ip': ip_, 'license_key': license_key_}
+                print(ip_[add_info.product_id-1])
+                cursor.execute("""
+                UPDATE licenses SET own_ip = %(own_ip)s WHERE license_key = %(lc_key)s;
+                """, {"own_ip": ip_[add_info.product_id-1],
+                      "lc_key": license_key_})
+                DBConnection.commit()
+                return {'port': port_} | {'ip': ip_[add_info.product_id-1], 'license_key': license_key_}
         except Exception as e:
             DBConnection.rollback()
             print(e)
@@ -152,17 +166,18 @@ where
                 })
                 tarif_id_and_count_of_product = cursor.fetchall()
                 cursor.execute(""" 
-                select port, ip_of_client  from device_port dp  where 
-                unique_id_cp = (select unique_id_cp  from licenses l where license_key =%(lc_key)s)  """,
+                select port, own_ip  from device_port dp, licenses  where 
+                dp.unique_id_cp = (select unique_id_cp  from licenses l where license_key =%(lc_key)s)
+                and license_key =%(lc_key)s""",
                                {'lc_key': check_info.license_key})
                 info_ip_port = cursor.fetchone()
                 info_of_id = [i['tarif_id'] for i in tarif_id_and_date if i['date_state'] is True]
                 info_of_count = any(
                     [True for j in tarif_id_and_count_of_product if j['state'] is True and j['tarif_id'] in info_of_id])
                 if info_of_count and info_of_id and info_ip_port is not None:
-                    return {'state': info_of_count, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
+                    return {'state': info_of_count, 'ip': info_ip_port["own_ip"], 'port': info_ip_port["port"]}
                 elif info_of_id and info_ip_port is not None:
-                    return {'state': False, 'ip': info_ip_port["ip_of_client"], 'port': info_ip_port["port"]}
+                    return {'state': False, 'ip': info_ip_port["own_ip"], 'port': info_ip_port["port"]}
                 return {'state': 0}
 
         except Exception as e:
