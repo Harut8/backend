@@ -59,7 +59,7 @@ where
                     print(juts_)
                     if juts_ is not None:
                         license_key_ = juts_['device_license_key']
-                        cursor.execute("""select port, own_ip from device_port dp, licenses
+                        cursor.execute("""select own_port as port, own_ip from device_port dp, licenses
                                                               where license_key = %(lc_key)s
                                                               and dp.unique_id_cp = %(uni)s""",
                                        {"uni": add_info.unique_code,
@@ -83,7 +83,7 @@ where
                 if juts_ is not None:
                     license_key_ = juts_['device_license_key']
                     print(license_key_)
-                    cursor.execute("""select port, own_ip from device_port dp, licenses
+                    cursor.execute("""select own_port as port, own_ip from device_port dp, licenses
                                       where license_key = %(lc_key)s
                                       and dp.unique_id_cp = %(uni)s""",
                                    {"uni": add_info.unique_code,
@@ -118,9 +118,10 @@ where
                 DBConnection.commit()
                 print(ip_[add_info.product_id-1])
                 cursor.execute("""
-                UPDATE licenses SET own_ip = %(own_ip)s WHERE license_key = %(lc_key)s;
+                UPDATE licenses SET own_ip = %(own_ip)s, own_port = %(port_)s WHERE license_key = %(lc_key)s;
                 """, {"own_ip": ip_[add_info.product_id-1],
-                      "lc_key": license_key_})
+                      "lc_key": license_key_,
+                      "port_": port_})
                 DBConnection.commit()
                 return {'port': port_} | {'ip': ip_[add_info.product_id-1], 'license_key': license_key_}
         except Exception as e:
@@ -166,7 +167,7 @@ where
                 })
                 tarif_id_and_count_of_product = cursor.fetchall()
                 cursor.execute(""" 
-                select port, own_ip  from device_port dp, licenses  where 
+                select own_port as port, own_ip  from device_port dp, licenses  where 
                 dp.unique_id_cp = (select unique_id_cp  from licenses l where license_key =%(lc_key)s)
                 and license_key =%(lc_key)s""",
                                {'lc_key': check_info.license_key})
