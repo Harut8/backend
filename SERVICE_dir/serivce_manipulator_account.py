@@ -168,7 +168,6 @@ class ServiceManipulatorACCOUNT:
                 c_id=tmp_["c_id"],
                 c_unique_id=tmp_["c_unique_id"],
                 c_name=tmp_["c_name"],
-                c_unique_id=tmp_["c_unique_id"],
                 c_contact_name=tmp_["c_contact_name"],
                 c_phone=tmp_["c_phone"],
                 c_email=tmp_["c_email"],

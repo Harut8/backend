@@ -17,7 +17,24 @@ class DatabaseManipulatorTARIFES:
                 return None
 
     @staticmethod
+    def get_check_status(bank_order_id: str):
+        with DBConnection.create_cursor() as cursor:
+            try:
+                cursor.execute("""select concat(
+                bi.check_status_url,
+                %(bank_order_id)s,
+                '&token=',
+                bank_token) check_url from bank_info bi """,
+                               {'bank_order_id': bank_order_id})
+                info = cursor.fetchone()
+                return info["check_url"]
+            except Exception as e:
+                print(e)
+                return
+
+    @staticmethod
     def update_bank_id(*, order_id, bank_order_id):
+        print(order_id)
         with DBConnection.create_cursor() as cursor:
             try:
                 cursor.execute("""
@@ -61,6 +78,7 @@ class DatabaseManipulatorTARIFES:
             except Exception as e:
                 print(e)
                 return
+
     @staticmethod
     def get_email_for_excel(order_id):
         """R"""
@@ -121,7 +139,8 @@ class DatabaseManipulatorTARIFES:
                                    web_manager_count,
                                    company_id,
                                    order_ending,
-                                   order_curr_type
+                                   order_curr_type,
+                                   tarif_id_fk
                                    ) VALUES(
                                    %(order_summ)s,
                                    %(bank_order_id)s,
@@ -131,7 +150,8 @@ class DatabaseManipulatorTARIFES:
                                    %(web_manager_count)s,
                                    %(company_id)s,
                                    current_timestamp + interval '%(interval)s month',
-                                   %(valute)s
+                                   %(valute)s,
+                                   %(tarif_id)s
                                    ) RETURNING order_id"""
                                ,
                                {
@@ -143,17 +163,22 @@ class DatabaseManipulatorTARIFES:
                                    "web_manager_count": web_manager_count,
                                    "company_id": company_id,
                                    "interval": interval,
-                                   "valute": valute
+                                   "valute": valute,
+                                   "tarif_id": tarif_id,
                                })
-                info = cursor.fetchone()
-                # cursor.execute("SELECT verify_payment(%(order_id)s, %(tarif_id)s)",
-                #                {"order_id": info["order_id"],
-                #                 "tarif_id": tarif_id})
+                info_ = cursor.fetchone()
                 DBConnection.commit()
-                return {"order_id": info["order_id"]}
+                cursor.execute("SELECT get_alpha_bank_url(%(order_id)s)",
+                               {"order_id": info_["order_id"], }
+                               )
+                info = cursor.fetchone()
+                print(info, info_)
+                DBConnection.commit()
+                return {"order_id": info_["order_id"], "register_url": info["get_alpha_bank_url"]}
             except Exception as e:
                 print(e)
                 return None
+
     @staticmethod
     def post_personal_info_to_order(*,
                                     order_summ,
@@ -169,23 +194,23 @@ class DatabaseManipulatorTARIFES:
         """Returns a dict of tarifes information"""
         with DBConnection.create_cursor() as cursor:
             try:
-                cursor.execute(
-                    """
-                    do 
-                    $do$
-                    declare 
-                    inn_info bigint;
-                    begin
-                    SELECT c_inn into inn_info from company where c_token = %(client_token)s;
-                    if inn_info is null then 
-                        raise Exception 'error' ;
-                    end if;
-                    end;
-                    $do$
-                    """
-                ,{
-                    "client_token": client_token
-                    })
+                # cursor.execute(
+                #     """
+                #     do
+                #     $do$
+                #     declare
+                #     inn_info bigint;
+                #     begin
+                #     SELECT c_inn into inn_info from company where c_token = %(client_token)s;
+                #     if inn_info is null then
+                #         raise Exception 'error' ;
+                #     end if;
+                #     end;
+                #     $do$
+                #     """
+                # ,{
+                #     "client_token": client_token
+                #     })
                 cursor.execute("""select c_id from company where c_token = %(client_token)s""",{"client_token":client_token})
                 company_id = cursor.fetchone()["c_id"]
                 cursor.execute("""
@@ -226,6 +251,56 @@ class DatabaseManipulatorTARIFES:
                                 "tarif_id": tarif_id})
                 DBConnection.commit()
                 return info
+            except Exception as e:
+                print(e)
+                return None
+
+    @staticmethod
+    def post_personal_info_to_order_after_banking(bank_order_id):
+        """Returns a dict of tarifes information"""
+        with DBConnection.create_cursor() as cursor:
+            try:
+                cursor.execute("""
+                    insert into saved_order_and_tarif ( order_summ,
+                                                        cass_stantion_count,
+                                                        mobile_cass_count,
+                                                        mobile_manager_count,
+                                                        web_manager_count,
+                                                        company_id,
+                                                        order_ending,
+                                                        order_state,
+                                                        order_curr_type,
+                                                        tarif_id_fk)
+                                                        select order_summ/100 as order_summ,
+                                                        cass_stantion_count,
+                                                        mobile_cass_count,
+                                                        mobile_manager_count,
+                                                        web_manager_count,
+                                                        company_id,
+                                                        order_ending,
+                                                        order_state,
+                                                        order_curr_type,
+                                                        tarif_id_fk from saved_order_and_tarif_bank
+                                                        where bank_order_id = %(bank_order_id)s and bank_state=-1
+                                                        returning order_id"""
+                               ,
+                               {
+                                   "bank_order_id": bank_order_id
+                               })
+                DBConnection.commit()
+                info = cursor.fetchone()
+                order_id = info["order_id"]
+                if order_id is None:
+                    return
+                cursor.execute("""
+                UPDATE saved_order_and_tarif_bank set bank_state=1 where bank_order_id = %(bank_order_id)s;""",
+                               {'bank_order_id': bank_order_id})
+
+                cursor.execute("SELECT verify_payment(%(order_id)s,"
+                               " (select tarif_id_fk from saved_order_and_tarif where order_id=%(order_id)s))",
+                               {"order_id": order_id})
+                DBConnection.commit()
+                return order_id
             except Exception as e:
                 print(e)
                 return None

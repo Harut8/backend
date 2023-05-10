@@ -68,7 +68,7 @@ class ServiceManipulatorTARIFES:
                 print(888)
                 temp_ = DatabaseManipulatorTARIFES.post_personal_info_to_bank_order(
                     tarif_id=item.tarif_id,
-                    order_summ=item.order_summ,
+                    order_summ=item.order_summ*100,
                     cass_stantion_count=item.cass_stantion_count,
                     mobile_cass_count=item.mobile_cass_count,
                     mobile_manager_count=item.mobile_manager_count,
@@ -99,9 +99,31 @@ class ServiceManipulatorTARIFES:
             return
 
     @staticmethod
+    def post_personal_info_to_order_after_banking(bank_order_id):
+        try:
+            order_id = DatabaseManipulatorTARIFES.post_personal_info_to_order_after_banking(bank_order_id)
+            if order_id:
+                return order_id
+            return
+        except Exception as e:
+            print(e)
+            return
+
+    @staticmethod
     def update_bank_id(*, order_id, bank_order_id):
         try:
             temp_ = DatabaseManipulatorTARIFES.update_bank_id(order_id=order_id, bank_order_id=bank_order_id)
+            if temp_:
+                return temp_
+            return
+        except Exception as e:
+            print(e)
+            return
+
+    @staticmethod
+    def get_check_status(bank_order_id: str):
+        try:
+            temp_ = DatabaseManipulatorTARIFES.get_check_status(bank_order_id=bank_order_id)
             if temp_:
                 return temp_
             return
