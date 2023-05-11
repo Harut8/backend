@@ -11,18 +11,17 @@ def send_download_links(*, receiver_email: str, message: list):
         #receiver_add = receiver_email
         #smtp_server = smtplib.SMTP_SSL("mail.pcassa.ru", 465)
         ##############
-        sender_email = 'pcassa.manager@mail.ru'
-        password = 'YfpzwLkLCBAaS1ndJpqi'
+        from API_dir.api_creator import email_, password_
         receiver_add = receiver_email
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
         smtp_server.starttls() #setting up to TLS connection
         ##############
         msg = MIMEMultipart('alternative')
         msg['Subject'] = "DOWNLOAD PCASSA APPS"
-        msg['From'] = formataddr(("PCASSA MANAGER", sender_email))
+        msg['From'] = formataddr(("PCASSA MANAGER", email_))
         msg['To'] = receiver_email
         #smtp_server.starttls() #setting up to TLS connection
-        smtp_server.login(sender_email, password) #logging into out email id
+        smtp_server.login(email_, password_) #logging into out email id
         text = "DOWNLOAD PCASSA APPS"
         print(message)
         link_for_desktop_cassa_windows = u'<a href="pcassa.ru/{mes}">CLICK TO DOWNLOAD WINDOWS DESKTOP CASSA</a>'.format(mes=message[0][0]) \

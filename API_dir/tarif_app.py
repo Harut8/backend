@@ -97,11 +97,10 @@ async def check_payment(orderId: str, client_token: str, lang: str, back_task: B
     checking = checking.json()
     print(checking)
     if checking["orderStatus"] == 2 and checking["errorCode"] == '0':
-        info_ = SMt.post_personal_info_to_order_after_banking(orderId)
-        print(info_)
-        # info_ = ServiceManipulatorADMIN.send_email_for_order_verify(client_token, "pre")
+        info = SMt.post_personal_info_to_order_after_banking(orderId)
+        info_ = ServiceManipulatorADMIN.send_email_for_order_verify(info, "pre")
         if info_:
-            # back_task.add_task(send_verify_link_to_client, info_, client_token)
+            back_task.add_task(send_verify_link_to_client, info_, client_token)
             return {"status": "ok", "message": "VERIFY LINK SENDED"}
     raise HTTPException(status_code=404, detail="ERROR", headers={'status': 'BUY ERROR'})
 
@@ -118,10 +117,10 @@ async def buy_tarife_by_card(
     order_id = state_of_buy["order_id"]
     url_for_register_ = state_of_buy["register_url"]
     client_token = encode_client_id_for_url(order_id)
-    url_for_register = f"{url_for_register_}{client_token}"
+    url_for_register = f"{url_for_register_}"+client_token
+    print(url_for_register)
     bank_check = requests.post(url_for_register)
     bank_check = bank_check.json()
-    print((bank_check))
     if bank_check.get("errorCode", '0') == '0':
         state_of_buy = SMt.update_bank_id(order_id=order_id, bank_order_id=bank_check["orderId"])
         personal_tarife.client_token = access_token

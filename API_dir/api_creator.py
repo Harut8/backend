@@ -13,6 +13,8 @@ from DB_dir.db_connection import DatabaseConnection
 conf = ConfigParser()
 conf.read('API_dir/API_CONFIG.ini')
 host = conf.get('API', 'host')
+email_ = conf.get('API', 'email')
+password_ = conf.get('API', 'password')
 #main_app = FastAPI(docs_url=None, redoc_url=None)
 main_app = FastAPI()
 main_app.include_router(account_app)

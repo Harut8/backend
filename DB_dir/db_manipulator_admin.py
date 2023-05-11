@@ -89,15 +89,20 @@ $$
         try:
             with DBConnection.create_cursor() as cursor:
                 if if_pre == "pre":
-                    cursor.execute("select c_email from company where c_id = "
-                                   "(SELECT company_id from saved_order_and_tarif_bank where order_id = %(order_id)s)",
+                    cursor.execute("""select c_email from company where c_id = 
+                                                       (SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)""",
                                    {"order_id": int(order_id)})
+                    info = cursor.fetchone()
+                    return info
                 if if_pre == "aft":
-                    cursor.execute("select c_email from company where c_id = "
-                                   "(SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)",
+                    cursor.execute("""select c_email from company where c_id = 
+                                   (SELECT company_id from saved_order_and_tarif where order_id = %(order_id)s)""",
                                    {"order_id": int(order_id)})
+                    info = cursor.fetchone()
+                    return info
+                return
                 # print(or)
-                return cursor.fetchone()
+
         except Exception as e:
             print(e)
             return

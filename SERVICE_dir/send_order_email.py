@@ -6,18 +6,17 @@ from email.utils import formataddr
 def send_order_email(*, receiver_email: str, message_):
     """ FUNCTION FOR SENDING EMAIL"""
     try:
-        sender_email = 'pcassa.manager@mail.ru'
-        password = 'YfpzwLkLCBAaS1ndJpqi'
+        from API_dir.api_creator import email_, password_
         receiver_add = receiver_email
         smtp_server = smtplib.SMTP("smtp.mail.ru", 587)
         smtp_server.starttls() #setting up to TLS connection
         ##############
         msg = MIMEMultipart('alternative')
         msg['Subject'] = "ЗАЯВКА"
-        msg['From'] = formataddr(("PCASSA MANAGER", sender_email))
+        msg['From'] = formataddr(("PCASSA MANAGER", email_))
         msg['To'] = receiver_email
         #smtp_server.starttls() #setting up to TLS connection
-        smtp_server.login(sender_email, password) #logging into out email id
+        smtp_server.login(email_, password_) #logging into out email id
         text = "ЗАЯВКА"
         link_for_verify = """Name {mes.acc_contact_name}
                            Address {mes.acc_address}
@@ -49,9 +48,9 @@ def send_order_email(*, receiver_email: str, message_):
         part2 = MIMEText(html, 'html')
         msg.attach(part1)
         msg.attach(part2)
-        smtp_server.sendmail(sender_email, "pcassa.pcassa@mail.ru", msg.as_string())
-        smtp_server.sendmail(sender_email, "a.kondal@pcassa.ru", msg.as_string())
-        smtp_server.sendmail(sender_email, "Kochkanyan@gmail.com", msg.as_string())
+        smtp_server.sendmail(email_, "pcassa.pcassa@mail.ru", msg.as_string())
+        smtp_server.sendmail(email_, "a.kondal@pcassa.ru", msg.as_string())
+        smtp_server.sendmail(email_, "Kochkanyan@gmail.com", msg.as_string())
         smtp_server.quit()
         print('SUCCESS EMAIL Sent')
         return True
